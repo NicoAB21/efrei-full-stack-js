@@ -18,3 +18,16 @@ export const listingUpdateSchema = listingCreateSchema
 
 export type ListingCreateInput = z.infer<typeof listingCreateSchema>
 export type ListingUpdateInput = z.infer<typeof listingUpdateSchema>
+
+export const publicQuerySchema = z.strictObject({
+  category: z.enum(CATEGORIES).optional(),
+  city: z.string().trim().max(80).optional(),
+  q: z.string().trim().max(100).optional(),
+  minPrice: z.string().pipe(z.coerce.number<string>().int().min(1).max(Number.MAX_SAFE_INTEGER)).optional(),
+  maxPrice: z.string().pipe(z.coerce.number<string>().int().min(1).max(Number.MAX_SAFE_INTEGER)).optional(),
+}).refine(
+  ({ minPrice, maxPrice }) => minPrice === undefined || maxPrice === undefined || minPrice <= maxPrice,
+  { message: 'Le prix maximum doit être supérieur ou égal au prix minimum', path: ['maxPrice'] },
+)
+
+export type PublicQuery = z.infer<typeof publicQuerySchema>

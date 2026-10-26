@@ -171,15 +171,15 @@ Pendant la Phase 2, Kelyan et Ismael peuvent déjà écrire les tests de leur st
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T042 [P] [US4] Écrire `backend/tests/public.test.ts` : sans token, `GET /api/public/listings` renvoie les annonces `available` de tous les vendeurs, jamais les `sold`, plus récentes d'abord, 50 max ; filtres `category`, `city` (insensible à la casse), `q` (titre ou description, insensible à la casse, caractères regex échappés), `minPrice`/`maxPrice` ; paramètre invalide (catégorie inconnue, prix non entier) → 400 ; `GET /api/public/listings/:id` d'une annonce `sold` → 404 ; aucune réponse ne contient d'email ; les 5 routes privées gardent leur comportement
+- [x] T042 [P] [US4] Écrire `backend/tests/public.test.ts` : sans token, `GET /api/public/listings` renvoie les annonces `available` de tous les vendeurs, jamais les `sold`, plus récentes d'abord, 50 max ; filtres `category`, `city` (insensible à la casse), `q` (titre ou description, insensible à la casse, caractères regex échappés), `minPrice`/`maxPrice` ; paramètre invalide (catégorie inconnue, prix non entier) → 400 ; `GET /api/public/listings/:id` d'une annonce `sold` → 404 ; aucune réponse ne contient d'email ; les 5 routes privées gardent leur comportement
 
 ### Implementation for User Story 4
 
-- [ ] T043 [P] [US4] Ajouter `publicQuerySchema` dans `backend/src/schemas/listing.ts` (`category` enum, `city` ≤ 80, `q` ≤ 100, `minPrice`/`maxPrice` entiers ≥ 1 via `z.coerce`, strict)
-- [ ] T044 [US4] Ajouter `listPublic(filters)` et `getPublic(id)` dans `backend/src/services/listing.service.ts` (filtre `status: "available"`, tri `createdAt: -1`, `limit(50)`, regex échappée pour `q` et `city`)
-- [ ] T045 [US4] Créer `backend/src/routes/public.ts` (sans middleware auth) et le monter sur `/api/public/listings` dans `backend/src/app.ts`
-- [ ] T046 [P] [US4] Créer `frontend/src/pages/Home.tsx` : formulaire de filtres labellisé (catégorie, ville, mot-clé, prix min/max en euros), liste en grille responsive, « Aucune annonce » si vide ; route `/` dans `frontend/src/App.tsx`
-- [ ] T047 [US4] Créer `frontend/src/pages/PublicListing.tsx` (route `/annonces/:id`) : titre, description, prix, catégorie, ville, date ; aucune donnée vendeur
+- [x] T043 [P] [US4] Ajouter `publicQuerySchema` dans `backend/src/schemas/listing.ts` (`category` enum, `city` ≤ 80, `q` ≤ 100, `minPrice`/`maxPrice` entiers ≥ 1 via `z.coerce`, strict)
+- [x] T044 [US4] Ajouter `listPublic(filters)` et `getPublic(id)` dans `backend/src/services/listing.service.ts` (filtre `status: "available"`, tri `createdAt: -1`, `limit(50)`, regex échappée pour `q` et `city`)
+- [x] T045 [US4] Créer `backend/src/routes/public.ts` (sans middleware auth) et le monter sur `/api/public/listings` dans `backend/src/app.ts`
+- [x] T046 [P] [US4] Créer `frontend/src/pages/Home.tsx` : formulaire de filtres labellisé (catégorie, ville, mot-clé, prix min/max en euros), liste en grille responsive, « Aucune annonce » si vide ; route `/` dans `frontend/src/App.tsx`
+- [x] T047 [US4] Créer `frontend/src/pages/PublicListing.tsx` (route `/annonces/:id`) : titre, description, prix, catégorie, ville, date ; aucune donnée vendeur
 
 **Checkpoint**: vitrine publique opérationnelle, MVP intact
 

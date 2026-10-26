@@ -26,6 +26,7 @@ img, svg { display: block; max-width: 100%; }
 /* ——— Utilitaires ——— */
 .wrap { width: 100%; max-width: 1160px; margin: 0 auto; padding: 0 var(--s-5); }
 .stack { display: grid; gap: var(--s-4); }
+.public-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: var(--s-4); }
 .row { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; }
 .muted { color: var(--text-2); }
 .small { font-size: var(--fs-sm); }
