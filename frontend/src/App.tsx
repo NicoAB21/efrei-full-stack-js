@@ -1,4 +1,4 @@
-import { LayoutGrid, LogIn, LogOut, Plus, Tag } from 'lucide-react'
+import { LayoutGrid, LogIn, Plus, Tag } from 'lucide-react'
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router'
 import { Logo } from './components/Logo'
 import { DesignPage } from './pages/DesignPage'
@@ -8,7 +8,7 @@ import { MyListings } from './pages/MyListings'
 import { AuthProvider, RequireAuth, useAuth } from './auth'
 import { Login } from './pages/Login'
 import { Register } from './pages/Register'
-import { Button } from './components/Button'
+import { AccountMenu } from './components/AccountMenu'
 
 // Page provisoire : chaque story remplace la sienne par la vraie page.
 function Todo({ title, task }: { title: string; task: string }) {
@@ -48,15 +48,7 @@ function AppContent() {
               <Tag size={20} aria-hidden />
               <span className="nav-label">Mes annonces</span>
             </NavLink>
-            {user ? (
-              <>
-                <span className="account-email" title={user.email}>{user.email}</span>
-                <Button variant="ghost" size="sm" onClick={logout}>
-                  <LogOut size={20} aria-hidden />
-                  <span className="nav-label">Se déconnecter</span>
-                </Button>
-              </>
-            ) : (
+            {!user && (
               <NavLink to="/login" className={navClass}>
                 <LogIn size={20} aria-hidden />
                 <span className="nav-label">Se connecter</span>
@@ -66,6 +58,7 @@ function AppContent() {
               <Plus size={18} aria-hidden />
               Vendre
             </Link>
+            {user && <AccountMenu email={user.email} onLogout={logout} />}
           </nav>
         </div>
       </header>
