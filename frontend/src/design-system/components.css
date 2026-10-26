@@ -58,8 +58,8 @@ img, svg { display: block; max-width: 100%; }
 
 /* ——— En-tête & pied de page ——— */
 .site-header { background: var(--surface); position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 0 var(--line); }
-.site-header .wrap { display: flex; align-items: center; gap: var(--s-4); min-height: 72px; }
-.site-header nav { display: flex; align-items: center; gap: var(--s-2); margin-left: auto; }
+.site-header .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-4); min-height: 72px; }
+.site-header nav { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin-left: auto; min-width: 0; }
 .nav-link { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--text); text-decoration: none; font-weight: 600; padding: 0 var(--s-3); border-radius: var(--r-pill); }
 .nav-link:hover { background: var(--soft); }
 .nav-link.active { color: var(--tag-dk); }

@@ -95,17 +95,17 @@ Pendant la Phase 2, Kelyan et Ismael peuvent déjà écrire les tests de leur st
 
 ### Tests for User Story 1 ⚠️
 
-- [ ] T020 [P] [US1] Écrire `backend/tests/auth.test.ts` : register → 201 `{"user":{"id","email"},"token"}` sans `password`/`passwordHash`/`_id` ; email renvoyé en minuscules ; `alice@example.test` après `Alice@Example.test` → 409 `EMAIL_ALREADY_USED` ; mot de passe de 7 caractères ou email invalide → 400 ; champ inconnu → 400 ; login correct → 200 ; mauvais mot de passe et email inconnu → 401 `UNAUTHORIZED` avec le même message
+- [x] T020 [P] [US1] Écrire `backend/tests/auth.test.ts` : register → 201 `{"user":{"id","email"},"token"}` sans `password`/`passwordHash`/`_id` ; email renvoyé en minuscules ; `alice@example.test` après `Alice@Example.test` → 409 `EMAIL_ALREADY_USED` ; mot de passe de 7 caractères ou email invalide → 400 ; champ inconnu → 400 ; login correct → 200 ; mauvais mot de passe et email inconnu → 401 `UNAUTHORIZED` avec le même message
 
 ### Implementation for User Story 1
 
-- [ ] T021 [P] [US1] Créer `backend/src/models/user.ts` : `email` string requis, `trim`, `lowercase`, **index unique** ; `passwordHash` string requis ; `timestamps: true` ; `toJSON` commun de T013
-- [ ] T022 [P] [US1] Créer `backend/src/schemas/auth.ts` : `credentialsSchema = z.object({ email: z.string().trim().toLowerCase().email(), password: z.string().min(8) }).strict()`
-- [ ] T023 [US1] Créer `backend/src/services/auth.service.ts` : `register` (bcrypt coût 10, erreur Mongo `11000` → 409 `EMAIL_ALREADY_USED`), `login` (message neutre unique « Email ou mot de passe incorrect » → 401), `signToken(userId)` (jsonwebtoken, `{ sub }`, `expiresIn: "2h"`)
-- [ ] T024 [US1] Créer `backend/src/controllers/auth.controller.ts` et `backend/src/routes/auth.ts` (`POST /api/auth/register` → 201, `POST /api/auth/login` → 200, réponse `{ user: { id, email }, token }`), monter dans `backend/src/app.ts`
-- [ ] T025 [P] [US1] Créer `frontend/src/auth.tsx` : `AuthProvider` + `useAuth()` (`user`, `token`, `login`, `register`, `logout`), token et user persistés dans `localStorage` ; composant `RequireAuth` qui redirige vers `/login`
-- [ ] T026 [US1] Créer `frontend/src/pages/Register.tsx` et `frontend/src/pages/Login.tsx` : labels explicites, validation UX (email, ≥ 8 caractères), erreurs serveur lisibles, état de chargement, redirection vers `/listings` ; `Login` affiche « Session expirée, reconnectez-vous » si `?expired=1`
-- [ ] T027 [US1] Ajouter l'état connecté dans l'en-tête de `frontend/src/App.tsx` (email + bouton « Se déconnecter ») et protéger les routes `/listings*` avec `RequireAuth`
+- [x] T021 [P] [US1] Créer `backend/src/models/user.ts` : `email` string requis, `trim`, `lowercase`, **index unique** ; `passwordHash` string requis ; `timestamps: true` ; `toJSON` commun de T013
+- [x] T022 [P] [US1] Créer `backend/src/schemas/auth.ts` : `credentialsSchema = z.object({ email: z.string().trim().toLowerCase().email(), password: z.string().min(8) }).strict()`
+- [x] T023 [US1] Créer `backend/src/services/auth.service.ts` : `register` (bcrypt coût 10, erreur Mongo `11000` → 409 `EMAIL_ALREADY_USED`), `login` (message neutre unique « Email ou mot de passe incorrect » → 401), `signToken(userId)` (jsonwebtoken, `{ sub }`, `expiresIn: "2h"`)
+- [x] T024 [US1] Créer `backend/src/controllers/auth.controller.ts` et `backend/src/routes/auth.ts` (`POST /api/auth/register` → 201, `POST /api/auth/login` → 200, réponse `{ user: { id, email }, token }`), monter dans `backend/src/app.ts`
+- [x] T025 [P] [US1] Créer `frontend/src/auth.tsx` : `AuthProvider` + `useAuth()` (`user`, `token`, `login`, `register`, `logout`), token et user persistés dans `localStorage` ; composant `RequireAuth` qui redirige vers `/login`
+- [x] T026 [US1] Créer `frontend/src/pages/Register.tsx` et `frontend/src/pages/Login.tsx` : labels explicites, validation UX (email, ≥ 8 caractères), erreurs serveur lisibles, état de chargement, redirection vers `/listings` ; `Login` affiche « Session expirée, reconnectez-vous » si `?expired=1`
+- [x] T027 [US1] Ajouter l'état connecté dans l'en-tête de `frontend/src/App.tsx` (email + bouton « Se déconnecter ») et protéger les routes `/listings*` avec `RequireAuth`
 
 **Checkpoint**: US1 fonctionnelle et testée
 

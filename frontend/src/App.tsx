@@ -5,6 +5,10 @@ import { DesignPage } from './pages/DesignPage'
 import { ListingDetail } from './pages/ListingDetail'
 import { EditListingPage, NewListingPage } from './pages/ListingForm'
 import { MyListings } from './pages/MyListings'
+import { AuthProvider, RequireAuth, useAuth } from './auth'
+import { Login } from './pages/Login'
+import { Register } from './pages/Register'
+import { Button } from './components/Button'
 
 // Page provisoire : chaque story remplace la sienne par la vraie page.
 function Todo({ title, task }: { title: string; task: string }) {
@@ -19,12 +23,16 @@ function Todo({ title, task }: { title: string; task: string }) {
 const navClass = ({ isActive }: { isActive: boolean }) => `nav-link ${isActive ? 'active' : ''}`
 
 function App() {
+  return <BrowserRouter><AuthProvider><AppContent /></AuthProvider></BrowserRouter>
+}
+
+function AppContent() {
+  const { user, logout } = useAuth()
   return (
-    <BrowserRouter>
+    <>
       <header className="site-header">
         <div className="wrap">
           <Logo />
-          {/* US1 (T027) : afficher le compte et « Se déconnecter » une fois connecté */}
           <nav aria-label="Navigation principale">
             <NavLink to="/" end className={navClass}>
               <LayoutGrid size={20} aria-hidden />
@@ -34,10 +42,13 @@ function App() {
               <Tag size={20} aria-hidden />
               <span className="nav-label">Mes annonces</span>
             </NavLink>
-            <NavLink to="/login" className={navClass}>
+            {user ? <>
+              <span style={{ overflowWrap: 'anywhere', minWidth: 0 }}>{user.email}</span>
+              <Button variant="ghost" size="sm" onClick={logout}>Se déconnecter</Button>
+            </> : <NavLink to="/login" className={navClass}>
               <LogIn size={20} aria-hidden />
               <span className="nav-label">Se connecter</span>
-            </NavLink>
+            </NavLink>}
             <Link to="/listings/new" className="btn btn-primary btn-sm">
               <Plus size={18} aria-hidden />
               Vendre
@@ -50,12 +61,14 @@ function App() {
         <div className="wrap">
           <Routes>
             <Route path="/" element={<Todo title="Annonces" task="US4, T046" />} />
-            <Route path="/login" element={<Todo title="Connexion" task="US1, T026" />} />
-            <Route path="/register" element={<Todo title="Inscription" task="US1, T026" />} />
-            <Route path="/listings" element={<MyListings />} />
-            <Route path="/listings/new" element={<NewListingPage />} />
-            <Route path="/listings/:id" element={<ListingDetail />} />
-            <Route path="/listings/:id/edit" element={<EditListingPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route element={<RequireAuth />}>
+              <Route path="/listings" element={<MyListings />} />
+              <Route path="/listings/new" element={<NewListingPage />} />
+              <Route path="/listings/:id" element={<ListingDetail />} />
+              <Route path="/listings/:id/edit" element={<EditListingPage />} />
+            </Route>
             <Route path="/design" element={<DesignPage />} />
             <Route path="*" element={<Todo title="Page introuvable" task="—" />} />
           </Routes>
@@ -69,7 +82,7 @@ function App() {
           <span>Projet EFREI · Full Stack JS</span>
         </div>
       </footer>
-    </BrowserRouter>
+    </>
   )
 }
 

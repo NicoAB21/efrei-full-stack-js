@@ -4,6 +4,7 @@ import swaggerUi from 'swagger-ui-express'
 import { parse } from 'yaml'
 import { errorHandler, notFound } from './errors.js'
 import { listingsRouter } from './routes/listings.js'
+import { authRouter } from './routes/auth.js'
 
 const openapi = parse(readFileSync(new URL('../openapi.yaml', import.meta.url), 'utf8'))
 
@@ -21,6 +22,7 @@ export function createApp() {
   // app.use('/api/auth', authRouter)        (US1)
   // app.use('/api/listings', listingsRouter) (US2)
   app.use('/api/listings', listingsRouter)
+  app.use('/api/auth', authRouter)
 
   app.use('/api', () => {
     throw notFound('Route inconnue')
