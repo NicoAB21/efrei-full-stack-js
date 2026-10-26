@@ -63,10 +63,37 @@ npm run dev            # http://localhost:5173, proxy /api → :3000
 
 ## Travailler à plusieurs
 
-1. Choisir une tâche non cochée dans [`specs/001-marketplace-mvp/tasks.md`](specs/001-marketplace-mvp/tasks.md)
-   (respecter l'ordre des phases).
-2. Créer une branche `feat/T0xx-description` depuis `main`.
-3. Avant la PR : `npm run lint && npm run build && npm test` dans le dossier modifié.
-4. Cocher la tâche dans `tasks.md` dans la même PR.
+Répartition et tâches : [`specs/001-marketplace-mvp/tasks.md`](specs/001-marketplace-mvp/tasks.md).
+
+**Une branche par phase attribuée** (ou par spec pour les futures specs), créée depuis `main` à jour :
+
+| Phase | Branche | Responsable |
+|---|---|---|
+| 2. Fondations + design system | `feat/phase2-fondations` | Nicolas |
+| 3. US1 Comptes | `feat/us1-comptes` | Kelyan |
+| 4. US2 Mes annonces | `feat/us2-annonces` | Ismael |
+| 5. US3 Isolation | `feat/us3-isolation` | Nicolas |
+| 6. US4 Vitrine | `feat/us4-vitrine` | Kelyan |
+| 7. US5 Messagerie | `feat/us5-messagerie` | Ismael |
+| 8. Finitions | `chore/finitions` | Nicolas |
+| Nouvelle spec (ex. `002-…`) | `002-nom-de-la-spec` (convention spec-kit) | qui la crée |
+
+Règles :
+
+- **Personne ne commit directement sur `main`** : tout passe par une Pull Request relue par un autre membre.
+- Commits petits et fréquents sur sa branche ; `git pull origin main` (ou rebase) régulièrement pour récupérer le travail des autres.
+- Avant la PR : `npm run lint && npm run build && npm test` dans le dossier modifié.
+- Cocher ses tâches dans `tasks.md` dans la PR qui les termine.
+- Fichiers partagés, sources de conflits : `frontend/src/App.tsx` (routes), `backend/src/app.ts` (montage des routeurs), `tasks.md`. N'y ajouter que ses lignes, sans réorganiser le reste.
+- Une phase ne démarre qu'une fois sa dépendance mergée dans `main` (colonne « Démarre après » de `tasks.md`).
+
+### spec-kit après un clone
+
+spec-kit retrouve la spec courante grâce à `.specify/feature.json`, un fichier local non versionné.
+À faire **une fois** après le clone, avant `/speckit-implement` :
+
+```bash
+echo '{ "feature_directory": "specs/001-marketplace-mvp" }' > .specify/feature.json
+```
 
 Le contrat d'API de référence est [`specs/001-marketplace-mvp/contracts/openapi.yaml`](specs/001-marketplace-mvp/contracts/openapi.yaml).

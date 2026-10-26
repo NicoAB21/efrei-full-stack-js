@@ -22,7 +22,7 @@ l'implémentation de chaque story et devant échouer d'abord.
 
 ## Travail en équipe
 
-- Une branche par tâche ou groupe de tâches : `feat/T0xx-description`, PR vers `main`.
+- **Une branche par phase attribuée** (noms dans le [README](../../README.md#travailler-à-plusieurs)), créée depuis `main` ; jamais de commit direct sur `main`, tout passe par une PR relue.
 - Cocher la tâche dans ce fichier dans la PR qui la termine.
 
 | Phase | Responsable | Tâches | Démarre après |
