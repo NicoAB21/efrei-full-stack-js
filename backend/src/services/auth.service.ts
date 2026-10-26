@@ -4,6 +4,9 @@ import { HttpError, unauthorized } from '../errors.js'
 import { User } from '../models/user.js'
 import type { Credentials } from '../schemas/auth.js'
 
+// Même coût que les mots de passe enregistrés, sans créer de compte fictif.
+const DUMMY_PASSWORD_HASH = '$2b$10$Hlouutui9asnzfSCQWZxlO/Eymp2K5DGqqF9wDBIOfR/Al2GsHYUe'
+
 export function signToken(userId: string) {
   return jwt.sign({ sub: userId }, process.env.JWT_SECRET!, { algorithm: 'HS256', expiresIn: '2h' })
 }
@@ -28,7 +31,8 @@ export async function register({ email, password }: Credentials) {
 
 export async function login({ email, password }: Credentials) {
   const user = await User.findOne({ email })
-  if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+  const passwordMatches = await bcrypt.compare(password, user?.passwordHash ?? DUMMY_PASSWORD_HASH)
+  if (!user || !passwordMatches) {
     throw unauthorized('Email ou mot de passe incorrect')
   }
   return session(user)
