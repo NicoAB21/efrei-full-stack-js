@@ -1,0 +1,222 @@
+/* Occaz — composants « Étiquette ». À charger après tokens.css.
+   CSS natif, aucune lib UI. Les composants React de src/components/ ne font que poser ces classes. */
+
+/* ——— Base ——— */
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--paper);
+  color: var(--text);
+  font: var(--fs-body)/1.5 var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+#root { min-height: 100dvh; display: flex; flex-direction: column; }
+h1, h2, h3 { margin: 0; line-height: 1.1; letter-spacing: -0.035em; text-wrap: balance; }
+h1 { font-size: var(--fs-h1); font-weight: 900; }
+h2 { font-size: var(--fs-h2); font-weight: 800; }
+h3 { font-size: var(--fs-h3); font-weight: 700; letter-spacing: -0.015em; }
+p { margin: 0; }
+a { color: var(--tag-dk); text-underline-offset: 3px; }
+img, svg { display: block; max-width: 100%; }
+::selection { background: var(--tag-lt); color: var(--night); }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+/* ——— Utilitaires ——— */
+.wrap { width: 100%; max-width: 1160px; margin: 0 auto; padding: 0 var(--s-5); }
+.stack { display: grid; gap: var(--s-4); }
+.row { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; }
+.muted { color: var(--text-2); }
+.small { font-size: var(--fs-sm); }
+.num { font-variant-numeric: tabular-nums; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.section-head { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); justify-content: space-between; align-items: end; margin-bottom: var(--s-4); }
+
+/* ——— Logo : le nom dans une étiquette (point bleu nuit fixe) ——— */
+.logo {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  font: 800 21px/1 var(--font);
+  letter-spacing: -0.04em;
+  color: var(--on-tag);
+  text-decoration: none;
+  background: var(--tag);
+  padding: 8px 14px 9px 25px;
+  clip-path: polygon(13px 0, 100% 0, 100% 100%, 13px 100%, 0 50%);
+  border-radius: 0 8px 8px 0;
+}
+.logo::before {
+  content: "";
+  position: absolute;
+  left: 11px; top: 50%;
+  width: 6px; height: 6px; margin-top: -3px;
+  border-radius: 50%;
+  background: var(--tag-hole);
+}
+
+/* ——— En-tête & pied de page ——— */
+.site-header { background: var(--surface); position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 0 var(--line); }
+.site-header .wrap { display: flex; align-items: center; gap: var(--s-4); min-height: 72px; }
+.site-header nav { display: flex; align-items: center; gap: var(--s-2); margin-left: auto; }
+.nav-link { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--text); text-decoration: none; font-weight: 600; padding: 0 var(--s-3); border-radius: var(--r-pill); }
+.nav-link:hover { background: var(--soft); }
+.nav-link.active { color: var(--tag-dk); }
+.site-main { flex: 1; padding-block: var(--s-5) var(--s-7); }
+.site-footer { background: var(--night-2); color: #cbd5e1; padding: var(--s-6) 0; font-size: var(--fs-sm); }
+.site-footer .wrap { display: flex; flex-wrap: wrap; gap: var(--s-4); justify-content: space-between; align-items: center; }
+
+/* ——— Boutons (pilule, 44 px mini) ——— */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+  min-height: 48px; padding: 0 var(--s-5);
+  border: 0; border-radius: var(--r-pill);
+  font: 700 15px/1 var(--font); text-decoration: none; cursor: pointer;
+  transition: background var(--t-fast), scale var(--t-fast);
+}
+.btn:active:not(:disabled) { scale: 0.97; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-sm { min-height: 44px; padding: 0 var(--s-4); font-size: 14px; }
+.btn-primary { background: var(--tag); color: var(--on-tag); }
+.btn-primary:hover:not(:disabled) { background: var(--tag-dk); }
+.btn-night { background: var(--night); color: #fff; }
+.btn-night:hover:not(:disabled) { background: var(--night-2); }
+.btn-secondary { background: var(--soft); color: var(--text); }
+.btn-secondary:hover:not(:disabled) { background: var(--line); }
+.btn-ghost { background: none; color: var(--text); }
+.btn-ghost:hover:not(:disabled) { background: var(--soft); }
+.btn-danger { background: var(--danger-soft); color: var(--danger); }
+.btn-danger:hover:not(:disabled) { background: #fee2e2; }
+/* Sur fond orange (hero) */
+.btn-white { background: #fff; color: var(--tag-dk); }
+.btn-white:hover { background: var(--tag-soft); }
+.btn-outline-white { background: transparent; color: #fff; box-shadow: inset 0 0 0 2px #fff; }
+.btn-outline-white:hover { background: rgb(255 255 255 / 0.12); }
+.icon-btn {
+  display: grid; place-items: center; width: 44px; height: 44px;
+  border: 0; border-radius: 50%; background: none; color: var(--text); cursor: pointer;
+}
+.icon-btn:hover { background: var(--soft); }
+
+/* ——— ★ Étiquette de prix (la signature) ——— */
+.price-tag {
+  position: relative; display: inline-block; justify-self: start;
+  font: 800 18px/1 var(--font); letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
+  color: var(--on-tag); background: var(--tag);
+  padding: 9px 13px 9px 24px;
+  clip-path: polygon(11px 0, 100% 0, 100% 100%, 11px 100%, 0 50%);
+  border-radius: 0 7px 7px 0;
+}
+.price-tag::before {
+  content: ""; position: absolute; left: 9px; top: 50%;
+  width: 6px; height: 6px; margin-top: -3px; border-radius: 50%;
+  background: var(--hole-bg, var(--paper)); /* trou : laisse voir le fond */
+}
+.price-tag-lg { font-size: 34px; padding: 13px 20px 13px 38px; clip-path: polygon(18px 0, 100% 0, 100% 100%, 18px 100%, 0 50%); border-radius: 0 10px 10px 0; }
+.price-tag-lg::before { left: 15px; width: 11px; height: 11px; margin-top: -5.5px; }
+.price-tag-sold { background: var(--sold); }
+
+/* Tampon « Vendu » */
+.stamp {
+  position: absolute; top: 45%; left: 50%; translate: -50% -50%; rotate: -12deg; z-index: 1;
+  font: 900 22px/1 var(--font); letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--sold); background: rgb(255 255 255 / 0.85);
+  border: 3px solid currentColor; border-radius: 6px; padding: 6px 12px;
+}
+
+/* ——— Badges de statut (point + mot) ——— */
+.badge {
+  justify-self: start; display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: var(--r-pill);
+}
+.badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.badge-available { color: var(--ok); background: var(--ok-soft); }
+.badge-sold { color: var(--sold); background: var(--soft); }
+
+/* ——— Carte d'annonce ——— */
+.listing-grid { display: grid; gap: var(--s-5) var(--s-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); }
+.listing-card { position: relative; display: grid; gap: 2px; }
+.listing-card .media {
+  --hole-bg: var(--soft);
+  position: relative; aspect-ratio: 1; margin-bottom: var(--s-2);
+  display: grid; place-items: center;
+  border-radius: var(--r-md); background: var(--soft); color: #94a3b8;
+  transition: scale var(--t) var(--ease);
+}
+.listing-card:hover .media { scale: 1.02; }
+.listing-card .media .price-tag { position: absolute; top: 14px; left: 0; z-index: 1; }
+.listing-card h3 { font-size: 15px; font-weight: 600; letter-spacing: 0; }
+.listing-card h3 a { color: inherit; text-decoration: none; }
+.listing-card h3 a::after { content: ""; position: absolute; inset: 0; } /* toute la carte est cliquable */
+.listing-card .meta { font-size: var(--fs-sm); color: var(--text-2); }
+.listing-card.is-sold .media svg { opacity: 0.4; }
+
+/* ——— Tuiles de catégorie ——— */
+.category-tiles { display: grid; gap: var(--s-3); grid-template-columns: repeat(auto-fill, minmax(116px, 1fr)); }
+.category-tile {
+  display: grid; justify-items: center; gap: var(--s-2); padding: var(--s-4) var(--s-2);
+  border: 0; border-radius: var(--r-md); background: var(--soft);
+  font: 600 14px var(--font); color: var(--text); text-decoration: none; cursor: pointer;
+}
+.category-tile:hover, .category-tile[aria-pressed="true"] { background: var(--tag-soft); color: var(--tag-dk); }
+
+/* ——— Hero (aplat orange + étiquette en filigrane) ——— */
+.hero {
+  position: relative; overflow: hidden; isolation: isolate;
+  background: var(--tag); color: #fff; border-radius: var(--r-lg); padding: 48px 44px;
+}
+.hero::after {
+  content: ""; position: absolute; right: -60px; top: 50%; width: 420px; height: 240px; z-index: -1;
+  translate: 0 -50%; rotate: -12deg; background: rgb(255 255 255 / 0.1);
+  clip-path: polygon(70px 0, 100% 0, 100% 100%, 70px 100%, 0 50%); border-radius: 0 28px 28px 0;
+}
+.hero h1 { font-size: var(--fs-display); max-width: 14ch; }
+.hero p { font-size: 18px; margin: var(--s-3) 0 var(--s-5); max-width: 46ch; color: var(--tag-soft); }
+
+/* ——— Panneaux ——— */
+.panel { background: var(--surface); border-radius: var(--r-lg); padding: var(--s-5); display: grid; gap: var(--s-4); box-shadow: var(--shadow); }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: var(--s-2); }
+.facts div { background: var(--soft); border-radius: var(--r-sm); padding: 10px 14px; font-size: var(--fs-sm); color: var(--text-2); }
+.facts b { display: block; color: var(--text); font-size: 15px; }
+
+/* ——— Champs ——— */
+.field { display: grid; gap: 6px; }
+.field label { font-weight: 700; font-size: 14px; }
+.field input, .field textarea, .field select {
+  width: 100%; min-height: 52px; padding: 0 16px;
+  border: 1.5px solid var(--line-strong); border-radius: var(--r-sm);
+  font: 16px var(--font); /* 16 px : pas de zoom auto sur iOS */
+  color: var(--text); background: var(--surface);
+}
+.field textarea { min-height: 110px; padding: 12px 16px; resize: vertical; }
+.field [aria-invalid="true"] { border-color: var(--danger); background: var(--danger-soft); }
+.field-hint { font-size: var(--fs-sm); color: var(--text-2); }
+.field-error { font-size: var(--fs-sm); color: var(--danger); font-weight: 700; }
+
+/* ——— Messages ——— */
+.alert { display: flex; gap: 10px; align-items: flex-start; padding: 14px 18px; border-radius: var(--r-sm); font-size: 14px; font-weight: 500; }
+.alert svg { flex: none; margin-top: 1px; }
+.alert-success { background: var(--ok-soft); color: #14532d; }
+.alert-error { background: var(--danger-soft); color: #7f1d1d; }
+
+/* ——— État vide ——— */
+.empty-state {
+  display: grid; gap: var(--s-2); justify-items: center; text-align: center;
+  padding: 44px var(--s-5); border-radius: var(--r-lg); background: var(--tag-soft);
+}
+.empty-state svg { color: var(--tag); }
+.empty-state strong { font-size: 22px; letter-spacing: -0.02em; }
+.empty-state .btn { margin-top: var(--s-2); }
+
+@media (max-width: 640px) {
+  .wrap { padding: 0 var(--s-4); }
+  .hero { padding: 32px 24px; }
+  .site-header .wrap { gap: var(--s-2); }
+  /* Navigation en icônes seules : le libellé reste lu par les lecteurs d'écran */
+  .nav-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .nav-link { padding: 0 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}

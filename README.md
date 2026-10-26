@@ -5,6 +5,7 @@ Site de petites annonces entre particuliers (principe Leboncoin) : module EFREI 
 - `frontend/` : React + Vite + TypeScript
 - `backend/` : Node.js + Express 5 + Mongoose + TypeScript
 - `specs/001-marketplace-mvp/` : spec, plan, contrat API et **tâches** (spec-kit)
+- Design system « Étiquette » : [`docs/design-system.md`](docs/design-system.md), règles dans [`frontend/src/design-system/GUIDE.md`](frontend/src/design-system/GUIDE.md), aperçu sur `/design`
 
 ## Prérequis
 

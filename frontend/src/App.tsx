@@ -1,46 +1,71 @@
+import { LayoutGrid, LogIn, Plus, Tag } from 'lucide-react'
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router'
+import { Logo } from './components/Logo'
 import { DesignPage } from './pages/DesignPage'
 
 // Page provisoire : chaque story remplace la sienne par la vraie page.
 function Todo({ title, task }: { title: string; task: string }) {
   return (
-    <>
+    <div className="stack">
       <h1>{title}</h1>
       <p className="muted">Page à réaliser ({task}).</p>
-    </>
+    </div>
   )
 }
+
+const navClass = ({ isActive }: { isActive: boolean }) => `nav-link ${isActive ? 'active' : ''}`
 
 function App() {
   return (
     <BrowserRouter>
       <header className="site-header">
-        <div className="container">
-          <Link to="/" className="logo">
-            Occaz
-          </Link>
-          {/* US1 (T027) : afficher l'email et « Se déconnecter » une fois connecté */}
+        <div className="wrap">
+          <Logo />
+          {/* US1 (T027) : afficher le compte et « Se déconnecter » une fois connecté */}
           <nav aria-label="Navigation principale">
-            <NavLink to="/listings">Mes annonces</NavLink>
-            <NavLink to="/listings/new">Publier</NavLink>
-            <NavLink to="/login">Se connecter</NavLink>
+            <NavLink to="/" end className={navClass}>
+              <LayoutGrid size={20} aria-hidden />
+              <span className="nav-label">Annonces</span>
+            </NavLink>
+            <NavLink to="/listings" end className={navClass}>
+              <Tag size={20} aria-hidden />
+              <span className="nav-label">Mes annonces</span>
+            </NavLink>
+            <NavLink to="/login" className={navClass}>
+              <LogIn size={20} aria-hidden />
+              <span className="nav-label">Se connecter</span>
+            </NavLink>
+            <Link to="/listings/new" className="btn btn-primary btn-sm">
+              <Plus size={18} aria-hidden />
+              Vendre
+            </Link>
           </nav>
         </div>
       </header>
 
-      <main className="container">
-        <Routes>
-          <Route path="/" element={<Todo title="Annonces" task="US4, T046" />} />
-          <Route path="/login" element={<Todo title="Connexion" task="US1, T026" />} />
-          <Route path="/register" element={<Todo title="Inscription" task="US1, T026" />} />
-          <Route path="/listings" element={<Todo title="Mes annonces" task="US2, T035" />} />
-          <Route path="/listings/new" element={<Todo title="Publier une annonce" task="US2, T036" />} />
-          <Route path="/listings/:id" element={<Todo title="Détail de l'annonce" task="US2, T037" />} />
-          <Route path="/listings/:id/edit" element={<Todo title="Modifier l'annonce" task="US2, T036" />} />
-          <Route path="/design" element={<DesignPage />} />
-          <Route path="*" element={<Todo title="Page introuvable" task="—" />} />
-        </Routes>
+      <main className="site-main">
+        <div className="wrap">
+          <Routes>
+            <Route path="/" element={<Todo title="Annonces" task="US4, T046" />} />
+            <Route path="/login" element={<Todo title="Connexion" task="US1, T026" />} />
+            <Route path="/register" element={<Todo title="Inscription" task="US1, T026" />} />
+            <Route path="/listings" element={<Todo title="Mes annonces" task="US2, T035" />} />
+            <Route path="/listings/new" element={<Todo title="Publier une annonce" task="US2, T036" />} />
+            <Route path="/listings/:id" element={<Todo title="Détail de l'annonce" task="US2, T037" />} />
+            <Route path="/listings/:id/edit" element={<Todo title="Modifier l'annonce" task="US2, T036" />} />
+            <Route path="/design" element={<DesignPage />} />
+            <Route path="*" element={<Todo title="Page introuvable" task="—" />} />
+          </Routes>
+        </div>
       </main>
+
+      <footer className="site-footer">
+        <div className="wrap">
+          <Logo />
+          <span>Vos objets ont encore de la valeur.</span>
+          <span>Projet EFREI · Full Stack JS</span>
+        </div>
+      </footer>
     </BrowserRouter>
   )
 }
