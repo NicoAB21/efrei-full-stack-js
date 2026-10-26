@@ -3,6 +3,9 @@ const euros = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR
 /** 12345 → "123,45 €" */
 export const formatPrice = (cents: number) => euros.format(cents / 100)
 
+export const toPriceInput = (cents: number) =>
+  `${Math.floor(cents / 100)},${String(cents % 100).padStart(2, '0')}`
+
 /**
  * Saisie en euros → centimes entiers, ou null si invalide.
  * Accepte "85", "85,5", "85.50", "1 200,00". Calcul sur les chiffres, sans flottant.
