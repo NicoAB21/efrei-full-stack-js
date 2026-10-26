@@ -19,7 +19,8 @@ export class ApiError extends Error {
 }
 
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = getToken()
+  const isAuthRequest = path === '/auth/login' || path === '/auth/register'
+  const token = isAuthRequest ? null : getToken()
   const headers = new Headers(options.headers)
   if (options.body) headers.set('Content-Type', 'application/json')
   if (token) headers.set('Authorization', `Bearer ${token}`)
@@ -35,6 +36,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
   // (un 401 au login = mauvais identifiants, à afficher dans le formulaire).
   if (res.status === 401 && token) {
     clearToken()
+    localStorage.removeItem('occaz.user')
     window.location.assign('/login?expired=1')
   }
 
