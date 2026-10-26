@@ -17,7 +17,7 @@ export function Card({ listing, to }: Props) {
       <p className="card-meta">
         {CATEGORIES[listing.category]} · {listing.city}
       </p>
-      {listing.status === 'sold' && <span className="badge">{STATUSES.sold}</span>}
+      <span className={`badge badge-${listing.status}`}>{STATUSES[listing.status]}</span>
     </article>
   )
 }

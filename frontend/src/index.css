@@ -1,21 +1,25 @@
 /* ===== Design tokens Occaz =====
+   Charte : MAP_Projet.md (identité visuelle d'Ismael).
    Toujours passer par ces variables plutôt que des valeurs en dur.
-   Contrastes vérifiés AA (≥ 4.5:1) pour le texte sur --color-bg / --color-surface. */
+   Contrastes vérifiés : texte ≥ 4.5:1, contours de champs ≥ 3:1. */
 :root {
   /* Couleurs */
-  --color-bg: #f6f7f9;
+  --color-bg: #f8fafc; /* blanc cassé */
   --color-surface: #ffffff;
-  --color-text: #1a1d23;
-  --color-text-muted: #545b66;
-  --color-border: #d4d8de;
-  --color-primary: #c2410c; /* orange « petites annonces », 5.2:1 sur blanc */
+  --color-text: #1e293b; /* bleu nuit, 14:1 */
+  --color-text-muted: #475569; /* 7.2:1 */
+  --color-border: #e2e8f0; /* séparateurs décoratifs */
+  --color-border-strong: #64748b; /* contours de champs et boutons, ≥ 3:1 */
+  --color-primary: #c2410c; /* orange « bonnes affaires », 5:1 sur blanc cassé */
   --color-primary-hover: #9a3412;
   --color-on-primary: #ffffff;
-  --color-danger: #b91c1c;
+  --color-danger: #b91c1c; /* erreur / suppression */
   --color-danger-hover: #991b1b;
-  --color-success: #15803d;
-  --color-success-bg: #ecfdf3;
+  --color-success: #15803d; /* disponible */
+  --color-success-bg: #f0fdf4;
   --color-error-bg: #fef2f2;
+  --color-sold: #475569; /* vendue (gris) */
+  --color-sold-bg: #f1f5f9;
   --color-focus: #2563eb;
 
   /* Espacements (échelle de 4 px) */
@@ -27,7 +31,7 @@
   --space-8: 2rem;
 
   /* Typographie */
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --text-sm: 0.875rem;
   --text-base: 1rem;
   --text-lg: 1.25rem;
@@ -91,11 +95,12 @@ img { max-width: 100%; }
   padding-block: var(--space-3);
 }
 .site-header .logo {
-  font-weight: 700;
+  font-weight: 800;
   font-size: var(--text-lg);
   color: var(--color-primary);
   text-decoration: none;
 }
+.site-header .logo::before { content: '🏷️ ' / ''; } /* décoratif, ignoré par les lecteurs d'écran */
 .site-header nav {
   display: flex;
   flex-wrap: wrap;
@@ -138,7 +143,7 @@ img { max-width: 100%; }
 .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .btn-primary { background: var(--color-primary); color: var(--color-on-primary); }
 .btn-primary:hover:not(:disabled) { background: var(--color-primary-hover); }
-.btn-secondary { background: var(--color-surface); color: var(--color-text); border-color: var(--color-border); }
+.btn-secondary { background: var(--color-surface); color: var(--color-text); border-color: var(--color-border-strong); }
 .btn-secondary:hover:not(:disabled) { background: var(--color-bg); }
 .btn-danger { background: var(--color-danger); color: var(--color-on-primary); }
 .btn-danger:hover:not(:disabled) { background: var(--color-danger-hover); }
@@ -152,7 +157,7 @@ img { max-width: 100%; }
   width: 100%;
   min-height: 44px;
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
   font: inherit;
   font-size: max(16px, 1rem); /* évite le zoom auto sur iOS */
@@ -195,9 +200,10 @@ img { max-width: 100%; }
   padding: 0 var(--space-2);
   border-radius: 999px;
   font-size: var(--text-sm);
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
+  font-weight: 600;
 }
+.badge-available { color: var(--color-success); background: var(--color-success-bg); }
+.badge-sold { color: var(--color-sold); background: var(--color-sold-bg); }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
