@@ -4,3 +4,18 @@ coverage/
 .env
 .env.*
 !.env.example
+
+# Pas de package.json à la racine : un lockfile ici vient d'un npm lancé au mauvais endroit
+/package-lock.json
+
+# Logs
+*.log
+
+# Éditeurs et OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Réglages Claude Code propres à chaque poste (les skills de .claude/ restent versionnés)
+.claude/settings.local.json
