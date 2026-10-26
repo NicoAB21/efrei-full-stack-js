@@ -17,11 +17,11 @@ Site de petites annonces entre particuliers (principe Leboncoin) : module EFREI 
 docker compose up --build
 ```
 
-| Service | URL |
-|---|---|
-| Front | http://localhost:5173 |
-| API | http://localhost:3000/api/health |
-| MongoDB | mongodb://localhost:27017 |
+| Service | URL                              |
+| ------- | -------------------------------- |
+| Front   | http://localhost:5173            |
+| API     | http://localhost:3000/api/health |
+| MongoDB | mongodb://localhost:27017        |
 
 Le code est monté dans les conteneurs : le rechargement à chaud fonctionne. Après un
 `npm install <paquet>`, relancer avec `docker compose up --build -V` (recrée les `node_modules`).
@@ -43,23 +43,23 @@ npm run dev            # http://localhost:5173, proxy /api → :3000
 
 ## Commandes
 
-| Dossier | Commande | Rôle |
-|---|---|---|
-| `backend/` | `npm run dev` | API avec rechargement (tsx) |
-| `backend/` | `npm run lint` | ESLint |
-| `backend/` | `npm run build` | compile vers `dist/` |
-| `backend/` | `npm test` | Jest + Supertest |
-| `frontend/` | `npm run dev` | serveur Vite |
-| `frontend/` | `npm run lint` | ESLint |
-| `frontend/` | `npm run build` | build de production |
+| Dossier     | Commande        | Rôle                        |
+| ----------- | --------------- | --------------------------- |
+| `backend/`  | `npm run dev`   | API avec rechargement (tsx) |
+| `backend/`  | `npm run lint`  | ESLint                      |
+| `backend/`  | `npm run build` | compile vers `dist/`        |
+| `backend/`  | `npm test`      | Jest + Supertest            |
+| `frontend/` | `npm run dev`   | serveur Vite                |
+| `frontend/` | `npm run lint`  | ESLint                      |
+| `frontend/` | `npm run build` | build de production         |
 
 ## Variables d'environnement (`backend/.env`)
 
-| Variable | Exemple | Rôle |
-|---|---|---|
-| `PORT` | `3000` | port de l'API |
-| `MONGODB_URI` | `mongodb://localhost:27017/occaz` | base MongoDB |
-| `JWT_SECRET` | `change-me-dev-only` | clé de signature des JWT (jamais versionnée) |
+| Variable      | Exemple                           | Rôle                                         |
+| ------------- | --------------------------------- | -------------------------------------------- |
+| `PORT`        | `3000`                            | port de l'API                                |
+| `MONGODB_URI` | `mongodb://localhost:27017/occaz` | base MongoDB                                 |
+| `JWT_SECRET`  | `change-me-dev-only`              | clé de signature des JWT (jamais versionnée) |
 
 ## Travailler à plusieurs
 
@@ -67,16 +67,17 @@ Répartition et tâches : [`specs/001-marketplace-mvp/tasks.md`](specs/001-marke
 
 **Une branche par phase attribuée** (ou par spec pour les futures specs), créée depuis `main` à jour :
 
-| Phase | Branche | Responsable |
-|---|---|---|
-| 2. Fondations + design system | `feat/phase2-fondations` | Nicolas |
-| 3. US1 Comptes | `feat/us1-comptes` | Kelyan |
-| 4. US2 Mes annonces | `feat/us2-annonces` | Ismael |
-| 5. US3 Isolation | `feat/us3-isolation` | Nicolas |
-| 6. US4 Vitrine | `feat/us4-vitrine` | Kelyan |
-| 7. US5 Messagerie | `feat/us5-messagerie` | Ismael |
-| 8. Finitions | `chore/finitions` | Nicolas |
-| Nouvelle spec (ex. `002-…`) | `002-nom-de-la-spec` (convention spec-kit) | qui la crée |
+| Phase                                                                                 | Branche                                    | Responsable |
+| ------------------------------------------------------------------------------------- | ------------------------------------------ | ----------- |
+| 0. Brainstorm ([MAP_Projet.md](MAP_Projet.md) : problème, cible, identité, priorités) | — (doc, directement sur `main`)            | Ismael      |
+| 2. Fondations + design system                                                         | `feat/phase2-fondations`                   | Nicolas     |
+| 3. US1 Comptes                                                                        | `feat/us1-comptes`                         | Kelyan      |
+| 4. US2 Mes annonces                                                                   | `feat/us2-annonces`                        | Ismael      |
+| 5. US3 Isolation                                                                      | `feat/us3-isolation`                       | Nicolas     |
+| 6. US4 Vitrine                                                                        | `feat/us4-vitrine`                         | Kelyan      |
+| 7. US5 Messagerie                                                                     | `feat/us5-messagerie`                      | Ismael      |
+| 8. Finitions                                                                          | `chore/finitions`                          | Nicolas     |
+| Nouvelle spec (ex. `002-…`)                                                           | `002-nom-de-la-spec` (convention spec-kit) | qui la crée |
 
 Règles :
 
