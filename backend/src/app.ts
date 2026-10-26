@@ -2,11 +2,13 @@ import { readFileSync } from 'node:fs'
 import express from 'express'
 import swaggerUi from 'swagger-ui-express'
 import { parse } from 'yaml'
+import { z } from 'zod'
 import { errorHandler, notFound } from './errors.js'
 import { listingsRouter } from './routes/listings.js'
 import { authRouter } from './routes/auth.js'
 
 const openapi = parse(readFileSync(new URL('../openapi.yaml', import.meta.url), 'utf8'))
+z.config(z.locales.fr())
 
 // Construit l'app sans ouvrir de port : server.ts l'écoute, les tests l'importent.
 export function createApp() {

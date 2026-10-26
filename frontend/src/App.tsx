@@ -1,4 +1,4 @@
-import { LayoutGrid, LogIn, Plus, Tag } from 'lucide-react'
+import { LayoutGrid, LogIn, LogOut, Plus, Tag } from 'lucide-react'
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router'
 import { Logo } from './components/Logo'
 import { DesignPage } from './pages/DesignPage'
@@ -23,7 +23,13 @@ function Todo({ title, task }: { title: string; task: string }) {
 const navClass = ({ isActive }: { isActive: boolean }) => `nav-link ${isActive ? 'active' : ''}`
 
 function App() {
-  return <BrowserRouter><AuthProvider><AppContent /></AuthProvider></BrowserRouter>
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </BrowserRouter>
+  )
 }
 
 function AppContent() {
@@ -42,13 +48,20 @@ function AppContent() {
               <Tag size={20} aria-hidden />
               <span className="nav-label">Mes annonces</span>
             </NavLink>
-            {user ? <>
-              <span style={{ overflowWrap: 'anywhere', minWidth: 0 }}>{user.email}</span>
-              <Button variant="ghost" size="sm" onClick={logout}>Se déconnecter</Button>
-            </> : <NavLink to="/login" className={navClass}>
-              <LogIn size={20} aria-hidden />
-              <span className="nav-label">Se connecter</span>
-            </NavLink>}
+            {user ? (
+              <>
+                <span className="account-email" title={user.email}>{user.email}</span>
+                <Button variant="ghost" size="sm" onClick={logout}>
+                  <LogOut size={20} aria-hidden />
+                  <span className="nav-label">Se déconnecter</span>
+                </Button>
+              </>
+            ) : (
+              <NavLink to="/login" className={navClass}>
+                <LogIn size={20} aria-hidden />
+                <span className="nav-label">Se connecter</span>
+              </NavLink>
+            )}
             <Link to="/listings/new" className="btn btn-primary btn-sm">
               <Plus size={18} aria-hidden />
               Vendre

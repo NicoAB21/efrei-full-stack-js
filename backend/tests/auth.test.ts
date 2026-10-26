@@ -1,11 +1,30 @@
 import request from 'supertest'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
+import { jest } from '@jest/globals'
 import { User } from '../src/models/user.js'
 import { createApp } from '../src/app.js'
 
 const app = createApp()
 const credentials = { email: 'Alice@Example.test', password: 'password123' }
+
+test('les erreurs de validation sont en français', async () => {
+  const res = await request(app).post('/api/auth/register').send({ ...credentials, email: 'invalide' })
+  expect(res.status).toBe(400)
+  expect(res.body.error.message).toBe('email : adresse e-mail invalide')
+})
+
+test('un email inconnu passe aussi par bcrypt avec le coût 10', async () => {
+  const compare = jest.spyOn(bcrypt, 'compare')
+  try {
+    const res = await request(app).post('/api/auth/login').send(credentials)
+    expect(res.status).toBe(401)
+    expect(compare).toHaveBeenCalledTimes(1)
+    expect(compare).toHaveBeenCalledWith(credentials.password, expect.stringMatching(/^\$2b\$10\$/))
+  } finally {
+    compare.mockRestore()
+  }
+})
 
 test('inscription : réponse publique, email normalisé et JWT utilisable de deux heures', async () => {
   const res = await request(app).post('/api/auth/register').send(credentials)

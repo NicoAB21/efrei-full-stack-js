@@ -63,6 +63,7 @@ img, svg { display: block; max-width: 100%; }
 .nav-link { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--text); text-decoration: none; font-weight: 600; padding: 0 var(--s-3); border-radius: var(--r-pill); }
 .nav-link:hover { background: var(--soft); }
 .nav-link.active { color: var(--tag-dk); }
+.account-email { max-width: 16rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .site-main { flex: 1; padding-block: var(--s-5) var(--s-7); }
 .site-footer { background: var(--night-2); color: #cbd5e1; padding: var(--s-6) 0; font-size: var(--fs-sm); }
 .site-footer .wrap { display: flex; flex-wrap: wrap; gap: var(--s-4); justify-content: space-between; align-items: center; }
@@ -213,6 +214,7 @@ img, svg { display: block; max-width: 100%; }
   .wrap { padding: 0 var(--s-4); }
   .hero { padding: 32px 24px; }
   .site-header .wrap { gap: var(--s-2); }
+  .account-email { flex-basis: 100%; max-width: 100%; order: 1; text-align: right; font-size: 12px; }
   /* Navigation en icônes seules : le libellé reste lu par les lecteurs d'écran */
   .nav-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .nav-link { padding: 0 10px; }
