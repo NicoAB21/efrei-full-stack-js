@@ -9,6 +9,8 @@ import { AuthProvider, RequireAuth, useAuth } from './auth'
 import { Login } from './pages/Login'
 import { Register } from './pages/Register'
 import { AccountMenu } from './components/AccountMenu'
+import { Home } from './pages/Home'
+import { PublicListing } from './pages/PublicListing'
 
 // Page provisoire : chaque story remplace la sienne par la vraie page.
 function Todo({ title, task }: { title: string; task: string }) {
@@ -66,7 +68,8 @@ function AppContent() {
       <main className="site-main">
         <div className="wrap">
           <Routes>
-            <Route path="/" element={<Todo title="Annonces" task="US4, T046" />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/annonces/:id" element={<PublicListing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route element={<RequireAuth />}>

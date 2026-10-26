@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { errorHandler, notFound } from './errors.js'
 import { listingsRouter } from './routes/listings.js'
 import { authRouter } from './routes/auth.js'
+import { publicRouter } from './routes/public.js'
 
 const openapi = parse(readFileSync(new URL('../openapi.yaml', import.meta.url), 'utf8'))
 z.config(z.locales.fr())
@@ -25,6 +26,7 @@ export function createApp() {
   // app.use('/api/listings', listingsRouter) (US2)
   app.use('/api/listings', listingsRouter)
   app.use('/api/auth', authRouter)
+  app.use('/api/public/listings', publicRouter)
 
   app.use('/api', () => {
     throw notFound('Route inconnue')
