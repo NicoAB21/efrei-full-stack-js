@@ -19,7 +19,9 @@ export const deleteListing = (id: string) => apiFetch<void>(`/listings/${id}`, {
 export const errorMessage = (error: unknown) =>
   error instanceof Error ? error.message : 'Une erreur inattendue est survenue. Réessayez.'
 
-export const loadErrorMessage = (error: unknown) =>
+// 404 = inexistante OU appartenant à un autre compte (l'API ne fait pas la différence) ; 400 = id mal formé
+export const isNotFound = (error: unknown) =>
   error instanceof ApiError && (error.status === 404 || error.status === 400)
-    ? 'Cette annonce est introuvable. Elle a peut-être été supprimée.'
-    : errorMessage(error)
+
+export const loadErrorMessage = (error: unknown) =>
+  isNotFound(error) ? 'Cette annonce est introuvable. Elle a peut-être été supprimée.' : errorMessage(error)

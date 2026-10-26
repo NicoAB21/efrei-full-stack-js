@@ -7,7 +7,7 @@ import { Button } from '../components/Button'
 import { PriceTag } from '../components/PriceTag'
 import { StatusBadge } from '../components/StatusBadge'
 import { CATEGORIES, type Listing } from '../constants'
-import { deleteListing, errorMessage, fetchListing, loadErrorMessage, updateListing } from '../listings'
+import { deleteListing, errorMessage, fetchListing, isNotFound, loadErrorMessage, updateListing } from '../listings'
 
 const longDate = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
 
@@ -16,7 +16,7 @@ export function ListingDetail() {
   const navigate = useNavigate()
   const flash = (useLocation().state as { message?: string } | null)?.message
   const [listing, setListing] = useState<Listing | null>(null)
-  const [loadError, setLoadError] = useState<string | null>(null)
+  const [loadError, setLoadError] = useState<{ notFound: boolean; message: string } | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [busy, setBusy] = useState<'status' | 'delete' | null>(null)
@@ -28,7 +28,7 @@ export function ListingDetail() {
         if (active) setListing(found)
       })
       .catch((e: unknown) => {
-        if (active) setLoadError(loadErrorMessage(e))
+        if (active) setLoadError({ notFound: isNotFound(e), message: loadErrorMessage(e) })
       })
     return () => {
       active = false
@@ -39,8 +39,8 @@ export function ListingDetail() {
     return (
       <div className="stack" style={{ maxWidth: 640, marginInline: 'auto' }}>
         <BackLink to="/listings">Mes annonces</BackLink>
-        <h1>Annonce introuvable</h1>
-        <Alert type="error">{loadError}</Alert>
+        <h1>{loadError.notFound ? 'Annonce introuvable' : "Impossible de charger l'annonce"}</h1>
+        <Alert type="error">{loadError.message}</Alert>
       </div>
     )
   }

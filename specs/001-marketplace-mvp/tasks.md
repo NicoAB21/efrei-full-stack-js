@@ -150,12 +150,12 @@ Pendant la Phase 2, Kelyan et Ismael peuvent déjà écrire les tests de leur st
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T039 [US3] Écrire `backend/tests/isolation.test.ts` : A et B créent chacun une annonce ; `GET /api/listings` de B ne contient que la sienne ; B fait `GET`, `PATCH`, `DELETE` sur l'annonce de A → 404 `NOT_FOUND` avec un corps identique à celui d'un id inexistant ; après le PATCH et le DELETE de B, l'annonce de A est inchangée et existe toujours
-- [ ] T040 [US3] Contre-épreuve manuelle : retirer temporairement `ownerId` du filtre dans `backend/src/services/listing.service.ts`, vérifier que `isolation.test.ts` échoue, puis restaurer (noter le résultat dans la PR)
+- [x] T039 [US3] Écrire `backend/tests/isolation.test.ts` : A et B créent chacun une annonce ; `GET /api/listings` de B ne contient que la sienne ; B fait `GET`, `PATCH`, `DELETE` sur l'annonce de A → 404 `NOT_FOUND` avec un corps identique à celui d'un id inexistant ; après le PATCH et le DELETE de B, l'annonce de A est inchangée et existe toujours
+- [x] T040 [US3] Contre-épreuve manuelle : retirer temporairement `ownerId` du filtre dans `backend/src/services/listing.service.ts`, vérifier que `isolation.test.ts` échoue, puis restaurer (noter le résultat dans la PR) → **fait le 2026-10-26** : retirer `ownerId` de `list()` fait échouer 2 tests, de `get()` 1, de `update()` 2, de `remove()` 2 ; restauré, 11/11 verts
 
 ### Implementation for User Story 3
 
-- [ ] T041 [US3] Corriger dans `backend/src/services/listing.service.ts` tout écart révélé par T039 (aucune requête sans `ownerId`) et vérifier dans `frontend/src/pages/ListingDetail.tsx` qu'une URL vers l'annonce d'un autre compte affiche « Annonce introuvable »
+- [x] T041 [US3] Corriger dans `backend/src/services/listing.service.ts` tout écart révélé par T039 (aucune requête sans `ownerId`) et vérifier dans `frontend/src/pages/ListingDetail.tsx` qu'une URL vers l'annonce d'un autre compte affiche « Annonce introuvable » → aucun écart côté service ; front : le titre « Annonce introuvable » n'apparaît plus que sur 404/400 (« Impossible de charger l'annonce » pour une erreur réseau ou serveur)
 
 **Checkpoint**: MVP complet (US1–US3), tous les tests verts — **ne pas commencer P2 avant**
 
