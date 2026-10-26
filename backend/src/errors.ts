@@ -26,6 +26,8 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     err = invalidInput(field ? `${field} : ${issue.message}` : issue.message)
   } else if (err?.type === 'entity.parse.failed') {
     err = invalidInput('Corps JSON mal formé')
+  } else if (err?.type && err.status >= 400 && err.status < 500) {
+    err = invalidInput('Corps de requête invalide ou trop volumineux')
   }
 
   if (err instanceof HttpError) {

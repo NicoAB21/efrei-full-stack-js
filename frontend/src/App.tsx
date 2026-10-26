@@ -2,6 +2,9 @@ import { LayoutGrid, LogIn, Plus, Tag } from 'lucide-react'
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router'
 import { Logo } from './components/Logo'
 import { DesignPage } from './pages/DesignPage'
+import { ListingDetail } from './pages/ListingDetail'
+import { EditListingPage, NewListingPage } from './pages/ListingForm'
+import { MyListings } from './pages/MyListings'
 
 // Page provisoire : chaque story remplace la sienne par la vraie page.
 function Todo({ title, task }: { title: string; task: string }) {
@@ -49,10 +52,10 @@ function App() {
             <Route path="/" element={<Todo title="Annonces" task="US4, T046" />} />
             <Route path="/login" element={<Todo title="Connexion" task="US1, T026" />} />
             <Route path="/register" element={<Todo title="Inscription" task="US1, T026" />} />
-            <Route path="/listings" element={<Todo title="Mes annonces" task="US2, T035" />} />
-            <Route path="/listings/new" element={<Todo title="Publier une annonce" task="US2, T036" />} />
-            <Route path="/listings/:id" element={<Todo title="Détail de l'annonce" task="US2, T037" />} />
-            <Route path="/listings/:id/edit" element={<Todo title="Modifier l'annonce" task="US2, T036" />} />
+            <Route path="/listings" element={<MyListings />} />
+            <Route path="/listings/new" element={<NewListingPage />} />
+            <Route path="/listings/:id" element={<ListingDetail />} />
+            <Route path="/listings/:id/edit" element={<EditListingPage />} />
             <Route path="/design" element={<DesignPage />} />
             <Route path="*" element={<Todo title="Page introuvable" task="—" />} />
           </Routes>

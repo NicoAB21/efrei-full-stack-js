@@ -24,6 +24,15 @@ test('JSON mal formé → 400 INVALID_INPUT', async () => {
   expect(res.body).toEqual({ error: { code: 'INVALID_INPUT', message: expect.any(String) } })
 })
 
+test('corps JSON trop volumineux → 400 INVALID_INPUT', async () => {
+  const res = await request(app)
+    .post('/api/health')
+    .set('Content-Type', 'application/json')
+    .send(JSON.stringify({ data: 'x'.repeat(200_000) }))
+  expect(res.status).toBe(400)
+  expect(res.body).toEqual({ error: { code: 'INVALID_INPUT', message: expect.any(String) } })
+})
+
 test('GET /api/docs sert Swagger UI', async () => {
   const res = await request(app).get('/api/docs/')
   expect(res.status).toBe(200)
