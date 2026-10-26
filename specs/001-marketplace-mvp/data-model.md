@@ -7,6 +7,69 @@ structurelles (types, `required`, `enum`, index).
 Sérialisation commune (`toJSON`) : `_id` → `id` (string), suppression de `__v` et de
 `passwordHash`. Les dates sortent en ISO 8601.
 
+## MCD (entités et associations)
+
+```mermaid
+erDiagram
+    USER ||--o{ LISTING : "publie"
+    USER ||--o{ MESSAGE : "envoie"
+    USER ||--o{ MESSAGE : "reçoit"
+    LISTING ||--o{ MESSAGE : "concerne"
+
+    USER {
+        ObjectId id PK
+        string email UK
+        string passwordHash
+        date createdAt
+        date updatedAt
+    }
+    LISTING {
+        ObjectId id PK
+        ObjectId ownerId FK
+        string title
+        string description
+        int priceCents
+        enum category
+        string city
+        enum status
+        date createdAt
+        date updatedAt
+    }
+    MESSAGE {
+        ObjectId id PK
+        ObjectId listingId FK
+        ObjectId senderId FK
+        ObjectId recipientId FK
+        string body
+        date createdAt
+    }
+```
+
+Cardinalités :
+
+- **publie** : un USER publie 0,n LISTING ; un LISTING est publié par 1,1 USER.
+- **envoie / reçoit** (P3) : un USER envoie 0,n MESSAGE et en reçoit 0,n ; un MESSAGE a
+  exactement 1 expéditeur et 1 destinataire.
+- **concerne** (P3) : un LISTING concerne 0,n MESSAGE ; un MESSAGE concerne 1,1 LISTING.
+
+## MLD
+
+Clé primaire **en gras**, clé étrangère précédée de `#`.
+
+- USER (**id**, email, passwordHash, createdAt, updatedAt)
+- LISTING (**id**, title, description, priceCents, category, city, status, createdAt, updatedAt, #ownerId)
+- MESSAGE (**id**, body, createdAt, #listingId, #senderId, #recipientId) — P3
+
+Choix de modélisation :
+
+- **Catégorie et statut** sont des listes fermées (`enum`), pas des tables : elles ne changent
+  pas à l'exécution et n'ont aucun attribut propre.
+- **MongoDB n'a pas de clés étrangères** : `ownerId`, `listingId`, etc. sont des ObjectId de
+  référence. L'intégrité (le propriétaire existe, l'annonce existe) est garantie par les
+  services, pas par la base.
+- **Références plutôt qu'imbrication** : les annonces ne sont pas imbriquées dans le document
+  utilisateur, car elles sont lues et filtrées seules (« Mes annonces », vitrine publique).
+
 ## User (`users`)
 
 | Champ | Type | Règles |

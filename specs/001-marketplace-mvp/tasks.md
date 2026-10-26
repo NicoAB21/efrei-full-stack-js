@@ -24,12 +24,28 @@ l'implémentation de chaque story et devant échouer d'abord.
 
 - Une branche par tâche ou groupe de tâches : `feat/T0xx-description`, PR vers `main`.
 - Cocher la tâche dans ce fichier dans la PR qui la termine.
+
+| Phase | Responsable | Tâches | Démarre après |
+|---|---|---|---|
+| 1. Setup | Nicolas | T001–T009 | — (fait) |
+| 2. Fondations + design system | Nicolas | T010–T019, T056 | Phase 1 |
+| 3. US1 Comptes | Kelyan | T020–T027 | Phase 2 |
+| 4. US2 Mes annonces | Ismael | T028–T038 | Phase 2 (en parallèle de US1) |
+| 5. US3 Isolation A/B | Nicolas | T039–T041 | US2 |
+| 6. US4 Vitrine publique | Kelyan | T042–T047 | US3 (MVP fini) |
+| 7. US5 Messagerie | Ismael | T048–T051 | US4 |
+| 8. Finitions | Nicolas (+ relecture de chacun) | T052–T055 | fin |
+
+Pendant la Phase 2, Kelyan et Ismael peuvent déjà écrire les tests de leur story
+(T020, T028–T030) à partir du contrat OpenAPI : ils doivent échouer tant que le code n'existe pas.
 - Le contrat [contracts/openapi.yaml](./contracts/openapi.yaml) fait foi : front et back peuvent
   avancer en parallèle dès la fin de la Phase 2.
 
 ---
 
 ## Phase 1: Setup (Shared Infrastructure)
+
+**Assigné à** : Nicolas
 
 **Purpose**: squelette des deux projets et lancement par Docker Compose
 
@@ -41,11 +57,13 @@ l'implémentation de chaque story et devant échouer d'abord.
 - [x] T006 [P] Initialiser `frontend/` avec Vite React TypeScript (`package.json` scripts `dev`, `build`, `preview`, `lint`), ajouter `react-router`, et configurer `frontend/vite.config.ts` avec un proxy `/api` vers `process.env.API_PROXY_TARGET ?? "http://localhost:3000"` pour `server` et `preview`
 - [x] T007 [P] Créer `backend/Dockerfile` et `frontend/Dockerfile` (image `node:24`, `npm ci`, commande `npm run dev`) et `.dockerignore` dans chaque dossier (`node_modules`, `dist`, `.env`)
 - [x] T008 Créer `docker-compose.yml` racine : service `mongo` (mongo:7, port 27017, volume nommé `mongo-data`), `backend` (build `./backend`, port 3000, env `MONGODB_URI=mongodb://mongo:27017/occaz`, `JWT_SECRET` de dev, code monté en volume + volume anonyme `node_modules`), `frontend` (build `./frontend`, port 5173, `API_PROXY_TARGET=http://backend:3000`, même logique de volumes)
-- [ ] T009 Vérifier : `npm run lint` et `npm run build` passent dans `backend/` et `frontend/` ; `docker compose up --build` puis `curl localhost:3000/api/health` → `{"status":"ok"}` et `localhost:5173` s'affiche
+- [x] T009 Vérifier : `npm run lint` et `npm run build` passent dans `backend/` et `frontend/` ; `docker compose up --build` puis `curl localhost:3000/api/health` → `{"status":"ok"}` et `localhost:5173` s'affiche
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
+
+**Assigné à** : Nicolas
 
 **Purpose**: briques communes à toutes les stories
 
@@ -61,12 +79,15 @@ l'implémentation de chaque story et devant échouer d'abord.
 - [ ] T017 [P] Créer `frontend/src/api.ts` : `apiFetch(path, options)` sur URL relatives `/api/...`, ajoute `Authorization: Bearer` si un token existe, parse `{"error":{"code","message"}}` en exception typée `ApiError(status, code, message)` ; sur 401 vide la session et redirige vers `/login?expired=1`
 - [ ] T018 [P] Créer `frontend/src/price.ts` : `formatPrice(cents)` → `"123,45 €"` (`Intl.NumberFormat("fr-FR", {style:"currency", currency:"EUR"})`) et `parsePrice(euros: string)` → centimes entiers ou `null` (accepte `85`, `85,5`, `85.50`) ; `frontend/src/constants.ts` avec les catégories (`vehicules` → « Véhicules », `immobilier` → « Immobilier », `multimedia` → « Multimédia », `maison` → « Maison », `mode` → « Mode », `loisirs` → « Loisirs », `autre` → « Autre ») et statuts (`available` → « Disponible », `sold` → « Vendue »)
 - [ ] T019 Créer la coquille front `frontend/src/App.tsx` + `frontend/src/main.tsx` : React Router, en-tête avec navigation, routes vides `/login`, `/register`, `/listings`, `/listings/new`, `/listings/:id`, `/listings/:id/edit` ; `frontend/src/index.css` responsive (pas de défilement horizontal à 375 px, `:focus-visible` marqué)
+- [ ] T056 [P] Design system (Nicolas) : variables CSS dans `frontend/src/index.css` (couleurs avec contraste AA, espacements, typographie, rayons, focus visible) et composants réutilisables accessibles dans `frontend/src/components/` : `Button` (variantes primaire, secondaire, danger ; état chargement), `Field` (label + input/textarea/select + message d'erreur relié par `aria-describedby`), `Alert` (succès / erreur, `role="alert"`), `Card` (aperçu d'annonce) ; page `/design` qui les montre tous pour que l'équipe s'en serve
 
-**Checkpoint**: fondations prêtes ; back et front peuvent avancer en parallèle
+**Checkpoint**: fondations prêtes ; back et front peuvent avancer en parallèle ; les pages des stories utilisent les composants de T056
 
 ---
 
 ## Phase 3: User Story 1 - Créer un compte et se connecter (Priority: P1) 🎯 MVP
+
+**Assigné à** : Kelyan
 
 **Goal**: inscription, connexion, session persistante et déconnexion
 
@@ -92,13 +113,15 @@ l'implémentation de chaque story et devant échouer d'abord.
 
 ## Phase 4: User Story 2 - Gérer ses propres annonces (Priority: P1) 🎯 MVP
 
+**Assigné à** : Ismael
+
 **Goal**: CRUD complet des annonces du vendeur connecté
 
 **Independent Test**: créer, lister, modifier, supprimer une annonce ; elle persiste après redémarrage du serveur
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T028 [P] [US2] Écrire `backend/tests/listings.test.ts` : parcours CRUD nominal (POST 201, GET liste `{"items":[...]}` plus récentes d'abord, GET :id 200, PATCH prix seul → seul le prix change, PATCH `status: "sold"`, DELETE 204 sans corps puis GET → 404) ; réponses avec `id` et `ownerId` string, jamais `_id`
+- [ ] T028 [P] [US2] Écrire `backend/tests/listings.test.ts` : parcours CRUD nominal (POST 201, GET liste `{"items":[...]}` plus récentes d'abord, GET :id 200, PATCH prix seul → seul le prix change, PATCH `status: "sold"`, DELETE 204 sans corps puis GET → 404) ; réponses avec `id` et `ownerId` string, jamais `_id`. Les tokens de test sont signés directement avec `jsonwebtoken` et `JWT_SECRET` de test sur des ObjectId générés (pas de dépendance aux routes d'US1)
 - [ ] T029 [P] [US2] Ajouter à `backend/tests/listings.test.ts` les cas 400 : titre vide ou `"   "`, titre de 121 caractères, description de 2001 caractères, `priceCents` 0, -5, 12.5, `"85"`, `9007199254740992` ; `priceCents` 1 accepté ; catégorie inconnue ; ville vide ou de 81 caractères ; statut inconnu ; champ inconnu ; `id` ou `ownerId` dans le corps ; PATCH `{}` ; id mal formé `abc` sur GET/PATCH/DELETE
 - [ ] T030 [P] [US2] Ajouter à `backend/tests/listings.test.ts` les cas 401 : sans header, `Bearer` invalide, token signé avec un autre secret, token expiré, sur les 5 routes
 
@@ -119,6 +142,8 @@ l'implémentation de chaque story et devant échouer d'abord.
 
 ## Phase 5: User Story 3 - Isolation entre deux vendeurs (Priority: P1) 🎯 MVP
 
+**Assigné à** : Nicolas
+
 **Goal**: preuve automatisée que B ne peut rien faire sur les annonces de A
 
 **Independent Test**: A et B ont chacun une annonce ; toute action de B sur l'annonce de A → 404
@@ -137,6 +162,8 @@ l'implémentation de chaque story et devant échouer d'abord.
 ---
 
 ## Phase 6: User Story 4 - Parcourir et rechercher les annonces publiées (Priority: P2)
+
+**Assigné à** : Kelyan
 
 **Goal**: vitrine publique en lecture seule avec filtres
 
@@ -160,6 +187,8 @@ l'implémentation de chaque story et devant échouer d'abord.
 
 ## Phase 7: User Story 5 - Contacter le vendeur (Priority: P3)
 
+**Assigné à** : Ismael
+
 **Goal**: messagerie acheteur → vendeur par annonce
 
 **Independent Test**: B écrit sur l'annonce de A ; A voit le message ; C ne le voit pas
@@ -178,6 +207,8 @@ l'implémentation de chaque story et devant échouer d'abord.
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
+**Assigné à** : Nicolas (chacun relit sa partie)
+
 - [ ] T052 [P] Mettre à jour `backend/openapi.yaml` pour qu'il corresponde exactement aux routes réellement implémentées
 - [ ] T053 [P] Compléter `README.md` : présentation, prérequis, lancement Docker et local, variables d'environnement, commandes `lint`/`build`/`test`, lien Swagger, choix techniques
 - [ ] T054 Passe accessibilité et mobile : parcours complet au clavier seul et à 375 px (SC-006), boutons nommés, focus visible dans `frontend/src/index.css`
@@ -189,10 +220,10 @@ l'implémentation de chaque story et devant échouer d'abord.
 
 ### Phase Dependencies
 
-- **Setup (Phase 1)** : aucune dépendance — ✅ fait sauf la vérification Docker de T009
+- **Setup (Phase 1)** : aucune dépendance — ✅ fait
 - **Foundational (Phase 2)** : après Setup ; bloque toutes les stories
 - **US1 (Phase 3)** : après Phase 2
-- **US2 (Phase 4)** : après Phase 2 ; a besoin du middleware auth (T012) et d'un utilisateur pour tester (T021–T024)
+- **US2 (Phase 4)** : après Phase 2 ; indépendante d'US1 (tokens de test signés directement, cf. T028), donc en parallèle
 - **US3 (Phase 5)** : après US2 (teste son service)
 - **US4 (Phase 6)** : après US3 (MVP terminé et testé, principe VI)
 - **US5 (Phase 7)** : après US4 (route sous `/api/public/listings/:id`)
@@ -205,7 +236,7 @@ l'implémentation de chaque story et devant échouer d'abord.
 
 ### Parallel Opportunities
 
-- Phase 2 : T012, T013, T014, T015, T016, T017, T018 en parallèle (back et front séparés)
+- Phase 2 : T012, T013, T014, T015, T016, T017, T018, T056 en parallèle (back et front séparés)
 - Dès la Phase 2 finie, une personne sur le back US1→US2→US3, une autre sur le front US1→US2 en s'appuyant sur le contrat OpenAPI
 
 ---
@@ -213,8 +244,8 @@ l'implémentation de chaque story et devant échouer d'abord.
 ## Parallel Example: User Story 2
 
 ```text
-Personne A (back) : T028, T029, T030 (tests) puis T031 + T032 → T033 → T034
-Personne B (front) : T035 et T036 en parallèle → T037 → T038
+Ismael (back) : T028, T029, T030 (tests) puis T031 + T032 → T033 → T034
+Ismael (front, après le back ou en parallèle avec le contrat) : T035 et T036 en parallèle → T037 → T038
 ```
 
 ---
