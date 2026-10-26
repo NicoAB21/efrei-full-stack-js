@@ -1,0 +1,8 @@
+# Image de développement (code monté en volume par docker-compose.yml)
+FROM node:24
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+EXPOSE 5173
+CMD ["npm", "run", "dev"]
