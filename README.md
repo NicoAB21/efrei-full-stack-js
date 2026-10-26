@@ -21,6 +21,8 @@ docker compose up --build
 |---|---|
 | Front | http://localhost:5173 |
 | API | http://localhost:3000/api/health |
+| Doc API (Swagger) | http://localhost:3000/api/docs |
+| Design system | http://localhost:5173/design |
 | MongoDB | mongodb://localhost:27017 |
 
 Le code est monté dans les conteneurs : le rechargement à chaud fonctionne. Après un
@@ -52,6 +54,7 @@ npm run dev            # http://localhost:5173, proxy /api → :3000
 | `frontend/` | `npm run dev` | serveur Vite |
 | `frontend/` | `npm run lint` | ESLint |
 | `frontend/` | `npm run build` | build de production |
+| `frontend/` | `npm test` | tests unitaires (runner natif `node --test`) |
 
 ## Variables d'environnement (`backend/.env`)
 

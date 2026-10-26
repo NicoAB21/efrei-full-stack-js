@@ -8,5 +8,9 @@ export default tseslint.config(
     files: ['**/*.ts'],
     extends: [js.configs.recommended, tseslint.configs.recommended],
     languageOptions: { globals: { ...globals.node, ...globals.jest } },
+    rules: {
+      // `_next` : Express reconnaît un middleware d'erreur à ses 4 paramètres
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    },
   },
 )

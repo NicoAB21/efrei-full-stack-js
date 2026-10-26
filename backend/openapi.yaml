@@ -1,0 +1,361 @@
+openapi: 3.0.3
+info:
+  title: Occaz API
+  version: 1.0.0
+  description: >
+    API de petites annonces (Contrat API v1 du livret appliqué à la ressource `listings`).
+    Routes marquées P2/P3 = extensions, à implémenter après le MVP.
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: health
+  - name: auth
+  - name: listings
+  - name: public
+    description: P2 — vitrine publique
+  - name: messages
+    description: P3 — messagerie
+
+paths:
+  /api/health:
+    get:
+      tags: [health]
+      summary: État du serveur
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status: { type: string, enum: [ok] }
+
+  /api/auth/register:
+    post:
+      tags: [auth]
+      summary: Créer un compte
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Credentials' }
+      responses:
+        '201': { $ref: '#/components/responses/AuthOk' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '409':
+          description: Email déjà utilisé (comparaison insensible à la casse)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/auth/login:
+    post:
+      tags: [auth]
+      summary: Se connecter
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Credentials' }
+      responses:
+        '200': { $ref: '#/components/responses/AuthOk' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401':
+          description: Email ou mot de passe incorrect (message neutre)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/listings:
+    get:
+      tags: [listings]
+      summary: Lister MES annonces (plus récentes d'abord)
+      responses:
+        '200':
+          description: Annonces du compte connecté uniquement
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ListingList' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [listings]
+      summary: Publier une annonce
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ListingCreate' }
+      responses:
+        '201':
+          description: Créée
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Listing' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/listings/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [listings]
+      summary: Détail d'une de MES annonces
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Listing' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [listings]
+      summary: Modifier partiellement une de MES annonces
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ListingUpdate' }
+      responses:
+        '200':
+          description: Annonce mise à jour
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Listing' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [listings]
+      summary: Supprimer une de MES annonces
+      responses:
+        '204': { description: Supprimée, aucun corps }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/public/listings:
+    get:
+      tags: [public]
+      summary: P2 — Annonces disponibles de tous les vendeurs (50 max, plus récentes d'abord)
+      security: []
+      parameters:
+        - { name: category, in: query, schema: { $ref: '#/components/schemas/Category' } }
+        - { name: city, in: query, schema: { type: string, maxLength: 80 } }
+        - { name: q, in: query, description: Mot-clé (titre ou description), schema: { type: string, maxLength: 100 } }
+        - { name: minPrice, in: query, description: En centimes, schema: { type: integer, minimum: 1 } }
+        - { name: maxPrice, in: query, description: En centimes, schema: { type: integer, minimum: 1 } }
+      responses:
+        '200':
+          description: OK (uniquement status = available)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ListingList' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+
+  /api/public/listings/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [public]
+      summary: P2 — Détail d'une annonce disponible
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Listing' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/public/listings/{id}/messages:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    post:
+      tags: [messages]
+      summary: P3 — Écrire au vendeur d'une annonce disponible (pas la sienne)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [body]
+              properties:
+                body: { type: string, minLength: 1, maxLength: 1000 }
+      responses:
+        '201':
+          description: Envoyé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Message' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/messages:
+    get:
+      tags: [messages]
+      summary: P3 — Messages reçus par le compte connecté
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Message' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      description: ObjectId (24 caractères hexadécimaux), sinon 400
+      schema: { type: string, pattern: '^[a-fA-F0-9]{24}$' }
+
+  schemas:
+    Credentials:
+      type: object
+      additionalProperties: false
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+
+    User:
+      type: object
+      required: [id, email]
+      properties:
+        id: { type: string }
+        email: { type: string }
+
+    Category:
+      type: string
+      enum: [vehicules, immobilier, multimedia, maison, mode, loisirs, autre]
+
+    Status:
+      type: string
+      enum: [available, sold]
+
+    ListingCreate:
+      type: object
+      additionalProperties: false
+      required: [title, priceCents, category, city]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 120, description: Espaces retirés avant contrôle }
+        description: { type: string, maxLength: 2000, default: '' }
+        priceCents: { type: integer, minimum: 1, maximum: 9007199254740991 }
+        category: { $ref: '#/components/schemas/Category' }
+        city: { type: string, minLength: 1, maxLength: 80 }
+        status: { $ref: '#/components/schemas/Status' }
+
+    ListingUpdate:
+      description: Mêmes champs que ListingCreate, tous facultatifs, au moins un requis
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        title: { type: string, minLength: 1, maxLength: 120 }
+        description: { type: string, maxLength: 2000 }
+        priceCents: { type: integer, minimum: 1, maximum: 9007199254740991 }
+        category: { $ref: '#/components/schemas/Category' }
+        city: { type: string, minLength: 1, maxLength: 80 }
+        status: { $ref: '#/components/schemas/Status' }
+
+    Listing:
+      type: object
+      required: [id, ownerId, title, description, priceCents, category, city, status, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        ownerId: { type: string }
+        title: { type: string }
+        description: { type: string }
+        priceCents: { type: integer }
+        category: { $ref: '#/components/schemas/Category' }
+        city: { type: string }
+        status: { $ref: '#/components/schemas/Status' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    ListingList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Listing' }
+
+    Message:
+      type: object
+      required: [id, listingId, senderId, recipientId, body, createdAt]
+      properties:
+        id: { type: string }
+        listingId: { type: string }
+        senderId: { type: string }
+        recipientId: { type: string }
+        body: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              enum: [INVALID_INPUT, UNAUTHORIZED, NOT_FOUND, EMAIL_ALREADY_USED]
+            message: { type: string }
+
+  responses:
+    AuthOk:
+      description: Compte authentifié
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [user, token]
+            properties:
+              user: { $ref: '#/components/schemas/User' }
+              token: { type: string }
+    InvalidInput:
+      description: Entrée invalide (corps, paramètre ou id mal formé)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: JWT absent, invalide ou expiré
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Inexistant ou appartenant à un autre compte
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
