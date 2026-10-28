@@ -163,6 +163,16 @@ Le contrat d'API de référence est [`specs/001-marketplace-mvp/contracts/openap
 
 ## Limites et évolutions
 
+Bonus spécifiés avec spec-kit (spec écrite, plan et implémentation à venir) :
+
+| Spec | Bonus | Priorité |
+|---|---|---|
+| [`002-favoris`](specs/002-favoris/spec.md) | Favoris liés au compte, page « Favoris », reprise des favoris du navigateur | 1 |
+| [`003-photos-annonces`](specs/003-photos-annonces/spec.md) | 0 à 5 photos par annonce, formats vérifiés, métadonnées retirées | 2 |
+| [`004-communes-fiables`](specs/004-communes-fiables/spec.md) | Communes officielles avec code postal, validées côté serveur | 3 |
+| [`005-paiement-demo`](specs/005-paiement-demo/spec.md) | Paiement Stripe **de démonstration** (mode test), une seule vente par annonce | optionnel, en dernier |
+
+
 - **Photos d'annonces** : pas encore d'upload (les cartes affichent le pictogramme de la catégorie). Évolution prévue : `multer`, JPEG/PNG/WebP vérifiés, 5 Mo max.
 - **Favoris** gardés dans le navigateur ; évolution prévue : favoris liés au compte (spec `002-favoris`).
 - **Ville** en texte libre ; évolution possible : communes officielles via `geo.api.gouv.fr`.
