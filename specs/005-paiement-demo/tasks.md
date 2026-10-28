@@ -137,6 +137,10 @@ propre annonce ». Les seuils ne sont donc écrits qu'une fois, côté serveur.
 - **Ajout** : `tests/setup.ts` retente le démarrage de MongoMemoryServer si le port tiré est déjà pris (échecs
   intermittents « Port already in use » devenus plus fréquents avec 13 suites).
 
+- **2026-10-28** : mentions « démo » retirées de l'interface (FR-010 retiré, voir spec.md) ; retour de Stripe sur une
+  page de confirmation dédiée `/paiement?achat=<id>` (récapitulatif avec photo, prochaines étapes) au lieu de
+  « Mes achats » ; l'achat fige aussi la vignette de la photo principale (`listingPhotoUrl`).
+
 ## Dependencies & Execution Order
 
 - Phase 1 → Phase 2 (T002–T006) → US1 → US2, US3, US4 (indépendantes entre elles, toutes sur `purchase.service.ts`, donc en série si une seule personne) → Polish.

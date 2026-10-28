@@ -19,7 +19,7 @@ Projet du module EFREI « Full Stack JS » (M1, octobre 2026), réalisé par Nic
 | + | **Paiement de démonstration** (Stripe, mode test) : « Acheter (démo) », vente validée par webhook signé, une seule vente par annonce (l'autre paiement est remboursé), « Mes achats » (spec 005) | connecté |
 | + | Sélections « Petits prix » et « Près de chez vous » | public |
 
-Pages : `/` (annonces), `/annonces/:id` (détail public), `/favoris`, `/login`, `/register`, `/listings` (mes annonces), `/listings/new`, `/listings/:id`, `/listings/:id/edit`, `/achats` (mes achats), `/messages` (messages reçus), `/design` (design system).
+Pages : `/` (accueil), `/recherche` (résultats et filtres), `/annonces/:id` (détail public), `/favoris`, `/login`, `/register`, `/listings` (mes annonces), `/listings/new`, `/listings/:id`, `/listings/:id/edit`, `/achats` et `/achats/:id` (mes achats, récapitulatif), `/messages` (messages reçus), `/design` (design system).
 
 ## Architecture
 
@@ -125,6 +125,7 @@ npm run dev            # http://localhost:5173, proxy /api → :3000
 | `backend/`  | `npm test`      | Jest + Supertest            |
 | `backend/`  | `npm run data:communes` | retélécharge le référentiel des communes (`data/communes.json`, une fois par an) |
 | `backend/`  | `npm run migrate:communes` | rattache les anciennes annonces à une commune (une fois, relançable) |
+| `backend/`  | `npm run seed` | données de démo : 5 comptes `alice`, `bruno`, `chloe`, `david`, `emma` `@occaz.test` (mot de passe `motdepasse`) et 23 annonces avec 29 photos (Wikimedia Commons, licences libres, crédits dans `backend/seed/photos/CREDITS.md`) ; relançable, ne touche qu'aux comptes `@occaz.test`. Docker : `docker compose exec backend npm run seed` |
 | `frontend/` | `npm run dev`   | serveur Vite                |
 | `frontend/` | `npm run lint`  | ESLint                      |
 | `frontend/` | `npm run build` | build de production         |

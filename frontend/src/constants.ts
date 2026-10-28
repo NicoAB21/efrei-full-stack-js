@@ -36,9 +36,9 @@ export type Listing = {
   updatedAt: string
   /** 0 à 5 photos, la première est la photo principale (spec 003) */
   photos: Photo[]
-  /** Détail public : achat en ligne de démonstration proposé (calculé par le serveur, spec 005) */
+  /** Détail public : achat en ligne proposé (calculé par le serveur, spec 005) */
   buyable?: boolean
-  /** Réponses privées du propriétaire : vente en ligne de démonstration */
+  /** Réponses privées du propriétaire : vente en ligne (spec 005) */
   soldOnline?: { at: string; priceCents: number }
 }
 
@@ -53,6 +53,8 @@ export type Purchase = {
   id: string
   listingId: string
   listingTitle: string
+  /** Vignette de la photo principale au moment de l'achat */
+  listingPhotoUrl: string | null
   priceCents: number
   status: keyof typeof PURCHASE_STATUSES
   createdAt: string

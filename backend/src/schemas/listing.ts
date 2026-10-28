@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { objectIdParam } from './common.js'
 
 export const CATEGORIES = ['vehicules', 'immobilier', 'multimedia', 'maison', 'mode', 'loisirs', 'autre'] as const
 export const STATUSES = ['available', 'sold'] as const
@@ -30,6 +31,11 @@ export const publicQuerySchema = z.strictObject({
   city: z.string().trim().max(80).optional(),
   cityCode: z.string().regex(/^[0-9][0-9AB][0-9]{3}$/, 'code de commune mal formé').optional(),
   q: z.string().trim().max(100).optional(),
+  ownerId: objectIdParam.optional(), // « autres annonces de ce vendeur » (ownerId est déjà public)
+  sort: z.enum(['recent', 'price_asc', 'price_desc']).optional(),
+  buyable: z.literal('1').optional(), // achat en ligne possible (spec 005)
+  photos: z.literal('1').optional(), // avec au moins une photo
+  page: z.string().pipe(z.coerce.number<string>().int().min(1).max(1000)).optional(),
   minPrice: z.string().pipe(z.coerce.number<string>().int().min(1).max(Number.MAX_SAFE_INTEGER)).optional(),
   maxPrice: z.string().pipe(z.coerce.number<string>().int().min(1).max(Number.MAX_SAFE_INTEGER)).optional(),
 }).refine(

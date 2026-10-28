@@ -143,8 +143,10 @@ vendue en ligne, à quelle date et à quel prix.
   quel prix, sans donnée personnelle de l'acheteur.
 - **FR-009**: Chacun MUST ne voir que ses propres achats ; toute tentative sur l'achat d'un autre compte
   MUST répondre « introuvable ».
-- **FR-010**: L'interface MUST signaler clairement le mode démonstration sur le bouton, la page de
-  paiement et la confirmation (« Paiement de démonstration, aucun débit réel »).
+- **FR-010**: ~~L'interface MUST signaler clairement le mode démonstration sur le bouton, la page de
+  paiement et la confirmation.~~ **Retiré le 2026-10-28 à la demande de l'équipe** : l'interface se présente
+  comme un vrai site. Le mode test reste garanti par le serveur (FR-011, clés `sk_live_` refusées) et la page
+  Stripe affiche toujours le badge « Sandbox ».
 - **FR-011**: Le système MUST fonctionner uniquement avec les identifiants de test du prestataire ; la
   configuration avec des identifiants réels MUST être refusée au démarrage.
 - **FR-012**: Les secrets du prestataire MUST venir de variables d'environnement, jamais du dépôt.
@@ -169,7 +171,7 @@ vendue en ligne, à quelle date et à quel prix.
   avec une confirmation falsifiée.
 - **SC-004**: 100 % des paiements en double sont remboursés automatiquement.
 - **SC-005**: 0 donnée de carte bancaire présente dans les données, les journaux ou le dépôt d'Occaz.
-- **SC-006**: 100 % des écrans du parcours d'achat affichent la mention « démonstration ».
+- **SC-006**: ~~100 % des écrans du parcours d'achat affichent la mention « démonstration ».~~ Retiré avec FR-010.
 
 ## Assumptions
 
