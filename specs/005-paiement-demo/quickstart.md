@@ -10,7 +10,7 @@ Contrat : [contracts/purchases.openapi.yaml](./contracts/purchases.openapi.yaml)
    et `FRONT_URL=http://localhost:5173`. Jamais dans git (`.env` est ignoré).
 3. Stripe CLI : `stripe login`, puis dans un terminal à part :
    ```bash
-   stripe listen --forward-to localhost:3000/api/stripe/webhook
+   stripe listen --events checkout.session.completed,checkout.session.expired --forward-to localhost:3000/api/stripe/webhook
    ```
    Copier le `whsec_…` affiché dans `STRIPE_WEBHOOK_SECRET`, puis relancer l'API.
 4. Sans ces variables, le site fonctionne mais le bouton « Acheter » n'apparaît pas.

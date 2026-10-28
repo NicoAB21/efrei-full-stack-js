@@ -15,9 +15,10 @@ Projet du module EFREI « Full Stack JS » (M1, octobre 2026), réalisé par Nic
 | + | **Favoris** liés au compte : cœur sur les cartes et le détail, page « Favoris », reprise des favoris du navigateur à la connexion (spec 002) | connecté (navigateur pour un visiteur) |
 | + | **Photos** : 0 à 5 par annonce (JPEG, PNG, WebP vérifiés, métadonnées GPS retirées), photo principale sur les cartes, galerie sur le détail (spec 003) | propriétaire / public |
 | + | **Communes officielles** : la ville se choisit dans les suggestions (nom ou code postal), vérifiée par le serveur ; recherche par commune sans tenir compte des accents (spec 004) | propriétaire / public |
+| + | **Paiement de démonstration** (Stripe, mode test) : « Acheter (démo) », vente validée par webhook signé, une seule vente par annonce (l'autre paiement est remboursé), « Mes achats » (spec 005) | connecté |
 | + | Sélections « Petits prix » et « Près de chez vous » | public |
 
-Pages : `/` (annonces), `/annonces/:id` (détail public), `/favoris`, `/login`, `/register`, `/listings` (mes annonces), `/listings/new`, `/listings/:id`, `/listings/:id/edit`, `/design` (design system).
+Pages : `/` (annonces), `/annonces/:id` (détail public), `/favoris`, `/login`, `/register`, `/listings` (mes annonces), `/listings/new`, `/listings/:id`, `/listings/:id/edit`, `/achats` (mes achats), `/design` (design system).
 
 ## Architecture
 
@@ -68,6 +69,8 @@ backend/   Express 5 + TypeScript : routes → contrôleurs → services → mod
 | `photos.test.ts` | photos : formats refusés (SVG, faux JPEG…), 5 Mo, 5 photos, GPS retiré, tout ou rien, ordre, suppression des fichiers, isolation A/B |
 | `communes.test.ts` | communes : suggestions (« lyo », code postal, accents, homonymes), commune inventée ou code postal incohérent refusés |
 | `migrate-communes.test.ts` | rattachement des anciennes annonces : sans ambiguïté rattachées, les autres laissées |
+| `purchases.test.ts` | achat de démo : prix lu en base, double clic, refus (sa propre annonce, Immobilier, > 10 000 €), Stripe injoignable, clé `sk_live_` refusée, « Mes achats » isolé |
+| `stripe-webhook.test.ts` | webhook : signature fausse ou absente sans effet, expiration, **deux paiements simultanés → 1 vente + 1 remboursement**, événement rejoué, vente en ligne définitive |
 | `openapi.test.ts` | chaque route décrite dans Swagger existe vraiment |
 
 Côté front, `npm test` (`node --test`, sans dépendance) vérifie la conversion des prix et `api.ts` : envoi du token, erreurs de connexion, retour à la connexion quand la session expire.
@@ -131,6 +134,24 @@ npm run dev            # http://localhost:5173, proxy /api → :3000
 | `PORT`        | `3000`                            | port de l'API                                |
 | `MONGODB_URI` | `mongodb://localhost:27017/occaz` | base MongoDB                                 |
 | `JWT_SECRET`  | `change-me-dev-only`              | clé de signature des JWT (jamais versionnée) |
+| `STRIPE_SECRET_KEY` | `sk_test_…` | facultatif : active le paiement de démonstration ; une clé `sk_live_` est refusée au démarrage |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_…` | obligatoire avec la clé : affiché par `stripe listen` |
+| `FRONT_URL` | `http://localhost:5173` | obligatoire avec la clé : retour après paiement |
+
+### Paiement de démonstration (spec 005)
+
+Aucun vrai argent ne circule : Stripe en **mode test** uniquement, le vendeur ne reçoit rien. Sans
+`STRIPE_SECRET_KEY`, le site fonctionne normalement et le bouton « Acheter » n'apparaît pas.
+
+1. Mettre `STRIPE_SECRET_KEY=sk_test_…` et `FRONT_URL=http://localhost:5173` dans `backend/.env`.
+2. Relayer les webhooks vers l'API locale (Stripe CLI), dans un terminal à part :
+   ```bash
+   stripe listen --events checkout.session.completed,checkout.session.expired --forward-to localhost:3000/api/stripe/webhook
+   ```
+   Copier le `whsec_…` affiché dans `STRIPE_WEBHOOK_SECRET`, puis relancer l'API.
+3. Cartes de test : `4242 4242 4242 4242` (acceptée), `4000 0000 0000 0002` (refusée), date future, CVC quelconque.
+
+Les tests automatiques n'appellent jamais Stripe (passerelle simulée, webhooks signés localement).
 
 ## Travailler à plusieurs
 
@@ -179,10 +200,10 @@ Bonus spécifiés avec spec-kit (spec, plan et tâches dans `specs/`) :
 | [`002-favoris`](specs/002-favoris/spec.md) | Favoris liés au compte, page « Favoris », reprise des favoris du navigateur | ✅ fait |
 | [`003-photos-annonces`](specs/003-photos-annonces/spec.md) | 0 à 5 photos par annonce, formats vérifiés, métadonnées retirées | ✅ fait |
 | [`004-communes-fiables`](specs/004-communes-fiables/spec.md) | Communes officielles avec code postal, validées côté serveur | ✅ fait |
-| [`005-paiement-demo`](specs/005-paiement-demo/spec.md) | Paiement Stripe **de démonstration** (mode test), une seule vente par annonce | optionnel, en dernier |
+| [`005-paiement-demo`](specs/005-paiement-demo/spec.md) | Paiement Stripe **de démonstration** (mode test), une seule vente par annonce | ✅ fait |
 
 
 - **Photos** stockées sur le disque du serveur (`UPLOADS_DIR`, défaut `backend/uploads/`, ignoré par git) : en production, il faudrait un volume persistant ou un stockage objet.
 - **Communes** : référentiel officiel figé dans `backend/data/communes.json` (API Géo, octobre 2026) ; les anciennes annonces ambiguës (ex. « Saint-Denis ») restent en texte libre jusqu'à leur prochaine modification.
 - **Messagerie** acheteur → vendeur (US5) spécifiée mais pas encore réalisée.
-- **Paiement** volontairement hors périmètre (la spec l'exclut) : un vrai paiement entre particuliers demanderait Stripe Connect.
+- **Paiement** de démonstration seulement : un vrai paiement entre particuliers demanderait Stripe Connect (compte vérifié par vendeur, reversement, frais).

@@ -29,6 +29,11 @@ const listingSchema = new Schema(
     postalCode: { type: String, default: null },
     cityKey: { type: String }, // nom normalisé, pour la recherche ; jamais renvoyé
     status: { type: String, enum: STATUSES, default: 'available' },
+    // Vente en ligne de démonstration (spec 005) : définitive, visible du propriétaire seulement
+    soldOnline: {
+      type: new Schema({ at: Date, priceCents: Number, purchaseId: Schema.Types.ObjectId }, { _id: false }),
+      default: undefined,
+    },
     photos: {
       type: [photoSchema],
       default: [],

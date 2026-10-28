@@ -2,7 +2,7 @@ import type { ErrorRequestHandler } from 'express'
 import { MulterError } from 'multer'
 import { ZodError } from 'zod'
 
-export type ErrorCode = 'INVALID_INPUT' | 'UNAUTHORIZED' | 'NOT_FOUND' | 'EMAIL_ALREADY_USED'
+export type ErrorCode = 'INVALID_INPUT' | 'UNAUTHORIZED' | 'NOT_FOUND' | 'EMAIL_ALREADY_USED' | 'PAYMENT_UNAVAILABLE'
 
 // À lever n'importe où (service, contrôleur, middleware) : le handler la formate.
 export class HttpError extends Error {
@@ -18,6 +18,7 @@ export class HttpError extends Error {
 export const invalidInput = (message = 'Entrée invalide') => new HttpError(400, 'INVALID_INPUT', message)
 export const unauthorized = (message = 'Authentification requise') => new HttpError(401, 'UNAUTHORIZED', message)
 export const notFound = (message = 'Ressource introuvable') => new HttpError(404, 'NOT_FOUND', message)
+export const paymentUnavailable = () => new HttpError(502, 'PAYMENT_UNAVAILABLE', 'Paiement indisponible, réessayez plus tard')
 
 // Erreurs de réception des photos (multer) → 400 lisible
 const MULTER_MESSAGES: Partial<Record<MulterError['code'], string>> = {

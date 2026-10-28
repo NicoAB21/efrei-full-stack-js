@@ -10,6 +10,9 @@ import { publicRouter } from './routes/public.js'
 import { favoritesRouter } from './routes/favorites.js'
 import { communesRouter } from './routes/communes.js'
 import { uploadsDir } from './photos/storage.js'
+import { paymentsConfig } from './config.js'
+import { purchasesRouter } from './routes/purchases.js'
+import { stripeWebhookRouter } from './routes/stripe-webhook.js'
 
 const openapi = parse(readFileSync(new URL('../openapi.yaml', import.meta.url), 'utf8'))
 z.config(z.locales.fr())
@@ -17,6 +20,9 @@ z.config(z.locales.fr())
 // Construit l'app sans ouvrir de port : server.ts l'écoute, les tests l'importent.
 export function createApp() {
   const app = express()
+  // Paiement de démonstration (spec 005) : absent si aucune clé Stripe de test n'est configurée
+  const payments = paymentsConfig() !== null
+  if (payments) app.use('/api/stripe/webhook', stripeWebhookRouter) // corps brut : avant express.json()
   app.use(express.json())
 
   app.get('/api/health', (_req, res) => {
@@ -32,6 +38,7 @@ export function createApp() {
   app.use('/api/public/listings', publicRouter)
   app.use('/api/favorites', favoritesRouter)
   app.use('/api/communes', communesRouter)
+  if (payments) app.use('/api/purchases', purchasesRouter)
 
   // Photos d'annonces : fichiers statiques, sans liste du dossier, jamais interprétés autrement qu'en image
   app.use(

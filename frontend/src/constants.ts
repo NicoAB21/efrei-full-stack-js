@@ -36,4 +36,25 @@ export type Listing = {
   updatedAt: string
   /** 0 à 5 photos, la première est la photo principale (spec 003) */
   photos: Photo[]
+  /** Détail public : achat en ligne de démonstration proposé (calculé par le serveur, spec 005) */
+  buyable?: boolean
+  /** Réponses privées du propriétaire : vente en ligne de démonstration */
+  soldOnline?: { at: string; priceCents: number }
+}
+
+export const PURCHASE_STATUSES = {
+  pending: 'En attente de confirmation',
+  confirmed: 'Confirmé',
+  refunded: 'Annonce déjà vendue, remboursé',
+  expired: 'Expiré',
+} as const
+
+export type Purchase = {
+  id: string
+  listingId: string
+  listingTitle: string
+  priceCents: number
+  status: keyof typeof PURCHASE_STATUSES
+  createdAt: string
+  confirmedAt: string | null
 }

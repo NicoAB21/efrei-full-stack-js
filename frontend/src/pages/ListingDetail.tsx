@@ -8,6 +8,7 @@ import { Gallery } from '../components/Gallery'
 import { PriceTag } from '../components/PriceTag'
 import { StatusBadge } from '../components/StatusBadge'
 import { CATEGORIES, type Listing } from '../constants'
+import { formatPrice } from '../price'
 import { deleteListing, errorMessage, fetchListing, isNotFound, loadErrorMessage, updateListing } from '../listings'
 
 const longDate = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -119,14 +120,23 @@ export function ListingDetail() {
           <p className="muted">Pas de description.</p>
         )}
 
+        {listing.soldOnline && (
+          <Alert type="success">
+            Vendue en ligne le {longDate.format(new Date(listing.soldOnline.at))} pour {formatPrice(listing.soldOnline.priceCents)} (paiement de démonstration).
+          </Alert>
+        )}
+
         <div className="row">
           <Link to={`/listings/${listing.id}/edit`} className="btn btn-secondary">
             <Pencil size={18} aria-hidden />
             Modifier
           </Link>
-          <Button variant="night" loading={busy === 'status'} disabled={busy !== null} onClick={() => toggleStatus(listing)}>
-            {sold ? 'Remettre en vente' : 'Marquer comme vendue'}
-          </Button>
+          {/* Vente en ligne définitive (spec 005) : pas de remise en vente */}
+          {!listing.soldOnline && (
+            <Button variant="night" loading={busy === 'status'} disabled={busy !== null} onClick={() => toggleStatus(listing)}>
+              {sold ? 'Remettre en vente' : 'Marquer comme vendue'}
+            </Button>
+          )}
           <Button variant="danger" loading={busy === 'delete'} disabled={busy !== null} onClick={() => remove(listing)}>
             <Trash2 size={18} aria-hidden />
             Supprimer

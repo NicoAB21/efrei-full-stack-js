@@ -6,7 +6,7 @@
   `price_data { currency: "eur", unit_amount: priceCents, product_data: { name: title } }`,
   `metadata { purchaseId, listingId }`, `client_reference_id: purchaseId`,
   `expires_at` = maintenant + 30 min (minimum accepté par Stripe), `success_url` =
-  `${FRONT_URL}/achats?session={CHECKOUT_SESSION_ID}`, `cancel_url` = `${FRONT_URL}/annonces/<id>?paiement=annule`.
+  `${FRONT_URL}/achats?achat=<purchaseId>`, `cancel_url` = `${FRONT_URL}/annonces/<id>?paiement=annule`.
 - **Rationale**: aucune donnée de carte ne touche Occaz (FR-002) ; Stripe affiche le mode test.
 - **Alternatives considered**: Payment Element intégré (plus de code front, données de carte dans notre
   page) ; Stripe Connect (reversement réel au vendeur, hors périmètre).
@@ -73,7 +73,7 @@
 
 ## 10. Démo en local
 
-- **Decision**: `stripe login` puis `stripe listen --forward-to localhost:3000/api/stripe/webhook` ; la CLI
+- **Decision**: `stripe login` puis `stripe listen --events checkout.session.completed,checkout.session.expired --forward-to localhost:3000/api/stripe/webhook` ; la CLI
   affiche le `whsec_…` à mettre dans `backend/.env`. Cartes de test : `4242 4242 4242 4242` (acceptée),
   `4000 0000 0000 0002` (refusée), date future, CVC quelconque.
 - **Rationale**: Stripe doit pouvoir joindre le webhook ; la CLI le fait sans exposer le serveur.

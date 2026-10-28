@@ -33,6 +33,9 @@ export async function create(ownerId: string, data: ListingCreateInput) {
 export async function update(ownerId: string, id: string, data: ListingUpdateInput) {
   const { cityCode, postalCode, ...rest } = data
   const changes: Record<string, unknown> = { ...rest }
+  if (rest.status === 'available' && (await Listing.exists({ _id: id, ownerId, soldOnline: { $exists: true } }))) {
+    throw invalidInput('Annonce vendue en ligne : elle ne peut pas être remise en vente')
+  }
   if (cityCode && postalCode) {
     Object.assign(changes, location(cityCode, postalCode))
   } else if (Object.keys(rest).some((key) => key !== 'status')) {

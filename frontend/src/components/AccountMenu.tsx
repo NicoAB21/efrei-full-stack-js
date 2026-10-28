@@ -1,5 +1,6 @@
-import { LogOut, UserRound } from 'lucide-react'
+import { LogOut, ShoppingBag, UserRound } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type FocusEvent } from 'react'
+import { Link } from 'react-router'
 
 type Props = {
   email: string
@@ -61,6 +62,10 @@ export function AccountMenu({ email, onLogout }: Props) {
               <strong title={email}>{email}</strong>
             </div>
           </div>
+          <Link to="/achats" className="account-action" onClick={() => setOpen(false)}>
+            <ShoppingBag size={18} aria-hidden />
+            Mes achats
+          </Link>
           <button type="button" className="account-action" onClick={onLogout}>
             <LogOut size={18} aria-hidden />
             Se déconnecter

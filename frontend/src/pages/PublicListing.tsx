@@ -1,9 +1,11 @@
-import { Heart } from 'lucide-react'
+import { Heart, ShoppingBag } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router'
+import { Link, useParams, useSearchParams } from 'react-router'
 import { apiFetch } from '../api'
 import { Alert } from '../components/Alert'
 import { BackLink } from '../components/BackLink'
+import { Button } from '../components/Button'
+import { DemoBanner } from '../components/DemoBanner'
 import { Gallery } from '../components/Gallery'
 import { PriceTag } from '../components/PriceTag'
 import { StatusBadge } from '../components/StatusBadge'
@@ -24,6 +26,22 @@ function Detail({ id }: { id: string }) {
   const { isFavorite, toggle } = useFavorites()
   const [listing, setListing] = useState<Listing | null>(null)
   const [error, setError] = useState<{ message: string; missing: boolean } | null>(null)
+  const cancelled = useSearchParams()[0].get('paiement') === 'annule'
+  const [buying, setBuying] = useState(false)
+  const [buyError, setBuyError] = useState('')
+
+  // Le serveur fixe le prix et renvoie la page de paiement Stripe (spec 005)
+  async function buy() {
+    setBuying(true)
+    setBuyError('')
+    try {
+      const { url } = await apiFetch<{ url: string }>('/purchases', { method: 'POST', body: JSON.stringify({ listingId: id }) })
+      window.location.assign(url)
+    } catch (cause) {
+      setBuyError(errorMessage(cause))
+      setBuying(false)
+    }
+  }
   useEffect(() => {
     let active = true
     apiFetch<Listing>(`/public/listings/${encodeURIComponent(id)}`)
@@ -46,6 +64,7 @@ function Detail({ id }: { id: string }) {
         <p role="status" className="muted">Chargement de l’annonce…</p>
       ) : (
         <article className="panel">
+          {cancelled && <Alert type="success">Paiement annulé : l’annonce est toujours disponible.</Alert>}
           <Gallery photos={listing.photos ?? []} title={listing.title} />
           <StatusBadge status={listing.status} />
           <h1>{listing.title}</h1>
@@ -58,6 +77,22 @@ function Detail({ id }: { id: string }) {
           <p style={{ whiteSpace: 'pre-line', overflowWrap: 'anywhere' }}>
             {listing.description || 'Pas de description.'}
           </p>
+          {listing.buyable && listing.ownerId !== user?.id && (
+            <div className="stack" style={{ gap: 'var(--s-2)' }}>
+              <DemoBanner />
+              {buyError && <Alert type="error">{buyError}</Alert>}
+              {user ? (
+                <Button variant="primary" loading={buying} onClick={buy}>
+                  <ShoppingBag size={18} aria-hidden />
+                  Acheter (démo)
+                </Button>
+              ) : (
+                <Link to="/login" className="btn btn-primary">
+                  Connectez-vous pour acheter
+                </Link>
+              )}
+            </div>
+          )}
           {listing.ownerId !== user?.id && (
             <div className="row">
               <button type="button" className="btn btn-secondary" aria-pressed={isFavorite(listing.id)} onClick={() => toggle(listing.id)}>
