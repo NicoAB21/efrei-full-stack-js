@@ -17,7 +17,8 @@ const valid = {
   description: 'Très bon état',
   priceCents: 8500,
   category: 'loisirs',
-  city: 'Lyon',
+  cityCode: '69123', // Lyon (spec 004 : commune officielle)
+  postalCode: '69001',
 }
 
 const create = (token: string, body: object = valid) =>
@@ -43,6 +44,7 @@ describe('CRUD nominal', () => {
     expect(res.status).toBe(201)
     expect(res.body).toEqual({
       ...valid,
+      city: 'Lyon', // nom officiel calculé par le serveur
       id: expect.any(String),
       ownerId: userId,
       status: 'available',
@@ -55,7 +57,7 @@ describe('CRUD nominal', () => {
   })
 
   test('POST sans description → description vide', async () => {
-    const res = await create(token, { title: 'Vélo', priceCents: 8500, category: 'loisirs', city: 'Lyon' })
+    const res = await create(token, { title: 'Vélo', priceCents: 8500, category: 'loisirs', cityCode: '69123', postalCode: '69001' })
     expect(res.status).toBe(201)
     expect(res.body.description).toBe('')
   })
@@ -119,13 +121,15 @@ describe('entrées invalides → 400 INVALID_INPUT', () => {
     ['prix en texte', { ...valid, priceCents: '85' }],
     ['prix au-delà de l\'entier sûr', { ...valid, priceCents: 9007199254740992 }],
     ['catégorie inconnue', { ...valid, category: 'jouets' }],
-    ['ville vide', { ...valid, city: ' ' }],
-    ['ville de 81 caractères', { ...valid, city: 'x'.repeat(81) }],
+    ['ville en texte libre', { ...valid, city: 'Lyon' }],
+    ['code de commune mal formé', { ...valid, cityCode: 'Lyon' }],
+    ['code postal mal formé', { ...valid, postalCode: '6900' }],
+    ['commune inconnue', { ...valid, cityCode: '99999' }],
     ['statut inconnu', { ...valid, status: 'archived' }],
     ['champ inconnu', { ...valid, color: 'rouge' }],
     ['id fourni', { ...valid, id: newId() }],
     ['ownerId fourni', { ...valid, ownerId: newId() }],
-    ['titre manquant', { priceCents: 8500, category: 'loisirs', city: 'Lyon' }],
+    ['titre manquant', { priceCents: 8500, category: 'loisirs', cityCode: '69123', postalCode: '69001' }],
   ])('POST %s', async (_label, body) => {
     const res = await create(token, body)
     expect(res.status).toBe(400)

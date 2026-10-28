@@ -27,7 +27,9 @@
 - **Decision**: `GET /api/communes?q=` public, `q` de 2 à 60 caractères ; si `q` est 5 chiffres (ou un début
   de code postal de 2 à 5 chiffres), recherche par code postal, sinon par préfixe du nom normalisé ;
   un résultat par couple (commune, code postal), 20 maximum ; tri : nom exactement égal à la saisie
-  d'abord, puis ordre alphabétique, puis code postal (le référentiel ne contient pas la population). Réponse :
+  d'abord, puis **population décroissante** (« mar » → Marseille, « lyo » → Lyon), puis ordre alphabétique,
+  puis code postal. La population est ajoutée au référentiel (champ `population` de l'API Géo) : le tri
+  alphabétique seul proposait « Lyoffans » avant Lyon (constaté à l'implémentation). Réponse :
   `{ items: [{ cityCode, name, postalCode, department, label: "Lyon (69003)" }] }`.
 - **Rationale**: US1 (« lyo », « 69003 ») et homonymes distingués par le code postal et le département.
 - **Alternatives considered**: recherche floue (fautes de frappe) : utile mais non demandé (VI).

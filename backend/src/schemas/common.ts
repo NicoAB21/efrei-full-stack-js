@@ -12,6 +12,7 @@ export const toJSONOptions: ToObjectOptions = {
     ret.id = String(ret._id)
     delete ret._id
     delete ret.passwordHash
+    delete ret.cityKey
     for (const [key, value] of Object.entries(ret)) {
       // Références (ownerId…) en string
       if (value instanceof Types.ObjectId) ret[key] = String(value)

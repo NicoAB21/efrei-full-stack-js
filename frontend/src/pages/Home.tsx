@@ -5,6 +5,7 @@ import { apiFetch } from '../api'
 import { Alert } from '../components/Alert'
 import { Button } from '../components/Button'
 import { CategoryIcon } from '../components/CategoryIcon'
+import { CommuneField, type CommuneChoice } from '../components/CommuneField'
 import { EmptyState } from '../components/EmptyState'
 import { Field } from '../components/Field'
 import { ListingCard } from '../components/ListingCard'
@@ -18,7 +19,7 @@ import { parsePrice, toPriceInput } from '../price'
 
 const SMALL_PRICE = 4000 // « Petits prix » : 40 € maximum
 const MAX_RESULTS = 50 // plafond renvoyé par l'API
-const FILTER_KEYS = ['q', 'city', 'category', 'minPrice', 'maxPrice']
+const FILTER_KEYS = ['q', 'city', 'cityCode', 'category', 'minPrice', 'maxPrice']
 
 const fetchPublic = async (query: string) =>
   (await apiFetch<{ items: Listing[] }>(`/public/listings${query ? `?${query}` : ''}`)).items
@@ -34,6 +35,12 @@ function Catalogue({ query, search }: { query: string; search: (params: URLSearc
   const params = new URLSearchParams(query)
   const filtered = FILTER_KEYS.some((key) => params.has(key))
   const category = params.get('category') as Category | null
+  // Commune choisie dans les suggestions (cityCode) ; le nom reste dans `city` pour l'affichage
+  const [commune, setCommune] = useState<CommuneChoice | null>(() => {
+    const code = params.get('cityCode')
+    const name = params.get('city') ?? ''
+    return code ? { cityCode: code, postalCode: '', name, label: name } : null
+  })
   const favoriteProps = useFavoriteProps()
 
   const [items, setItems] = useState<Listing[] | null>(null)
@@ -73,7 +80,10 @@ function Catalogue({ query, search }: { query: string; search: (params: URLSearc
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
-    update({ q: String(data.get('q') ?? '').trim() || null, city: String(data.get('city') ?? '').trim() || null })
+    const q = String(data.get('q') ?? '').trim() || null
+    // Suggestion choisie → toute la commune (tous codes postaux) ; sinon le texte tapé
+    if (commune) update({ q, city: commune.name, cityCode: commune.cityCode })
+    else update({ q, city: String(data.get('city') ?? '').trim() || null, cityCode: null })
   }
 
   function submitPrices(event: FormEvent<HTMLFormElement>) {
@@ -120,11 +130,14 @@ function Catalogue({ query, search }: { query: string; search: (params: URLSearc
             <span className="sr-only">Que cherchez-vous ?</span>
             <input name="q" placeholder="Que cherchez-vous ? Ex. vélo" maxLength={100} defaultValue={params.get('q') ?? ''} />
           </label>
-          <label>
-            <MapPin size={18} aria-hidden />
-            <span className="sr-only">Ville</span>
-            <input name="city" placeholder="Ville" maxLength={80} defaultValue={params.get('city') ?? ''} />
-          </label>
+          <CommuneField
+            label="Ville"
+            name="city"
+            placeholder="Ville ou code postal"
+            value={commune}
+            onChange={setCommune}
+            initialText={params.get('city') ?? ''}
+          />
           <button type="submit" className="btn btn-primary">Rechercher</button>
         </form>
       </section>
@@ -225,10 +238,10 @@ function Catalogue({ query, search }: { query: string; search: (params: URLSearc
         <section className="stack" aria-labelledby="cities-title">
           <h2 id="cities-title">Près de chez vous</h2>
           <div className="chips">
-            {cities.map(([city, count]) => (
-              <button key={city} type="button" className="chip" onClick={() => update({ city })}>
+            {cities.map(({ name, cityCode, count }) => (
+              <button key={cityCode ?? name} type="button" className="chip" onClick={() => update({ city: name, cityCode })}>
                 <MapPin size={16} aria-hidden />
-                {city}
+                {name}
                 <span className="count">{count}</span>
               </button>
             ))}
@@ -271,9 +284,14 @@ function Catalogue({ query, search }: { query: string; search: (params: URLSearc
   )
 }
 
-/** Les 8 villes les plus fréquentes, avec leur nombre d'annonces. */
-function topCities(items: Listing[]): [string, number][] {
-  const counts = new Map<string, number>()
-  for (const { city } of items) counts.set(city, (counts.get(city) ?? 0) + 1)
-  return [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'fr')).slice(0, 8)
+/** Les 8 communes les plus fréquentes (regroupées par code officiel ; texte pour les anciennes annonces). */
+function topCities(items: Listing[]) {
+  const groups = new Map<string, { name: string; cityCode: string | null; count: number }>()
+  for (const { city, cityCode } of items) {
+    const key = cityCode ?? city.toLowerCase()
+    const group = groups.get(key) ?? { name: city, cityCode, count: 0 }
+    group.count += 1
+    groups.set(key, group)
+  }
+  return [...groups.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'fr')).slice(0, 8)
 }

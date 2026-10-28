@@ -29,7 +29,7 @@ valide → 201 avec `city` = nom officiel ; filtre `city=lyon` → toutes les an
 | Requête | Attendu |
 |---|---|
 | `GET /api/communes?q=lyo` | 200, Lyon (69001) … (69009) parmi les premiers |
-| `GET /api/communes?q=97411` | 200, Saint-Pierre (La Réunion) |
+| `GET /api/communes?q=97400` | 200, Saint-Denis (97400), La Réunion |
 | `POST /api/listings` `{…, "cityCode":"69123","postalCode":"69003"}` | 201, `"city":"Lyon"` |
 | `POST /api/listings` `{…, "cityCode":"69123","postalCode":"75001"}` | 400 |
 | `POST /api/listings` `{…, "city":"Lyon"}` | 400 |

@@ -24,7 +24,7 @@ async function publish(account: Account, title: string): Promise<Listing> {
   const res = await request(app)
     .post('/api/listings')
     .set(as(account))
-    .send({ title, priceCents: 8500, category: 'loisirs', city: 'Lyon' })
+    .send({ title, priceCents: 8500, category: 'loisirs', cityCode: '69123', postalCode: '69001' })
   expect(res.status).toBe(201)
   return res.body
 }
@@ -86,7 +86,7 @@ describe("B tente d'imposer le propriétaire ou l'identifiant", () => {
     const res = await request(app)
       .post('/api/listings')
       .set(as(bob))
-      .send({ title: 'Cadeau', priceCents: 100, category: 'autre', city: 'Paris', ownerId: alice.id })
+      .send({ title: 'Cadeau', priceCents: 100, category: 'autre', cityCode: '75056', postalCode: '75001', ownerId: alice.id })
     expect(res.status).toBe(400)
     expect(res.body.error.code).toBe('INVALID_INPUT')
 

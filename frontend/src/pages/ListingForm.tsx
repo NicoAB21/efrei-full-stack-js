@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { Alert } from '../components/Alert'
 import { BackLink } from '../components/BackLink'
 import { Button } from '../components/Button'
+import { CommuneField, type CommuneChoice } from '../components/CommuneField'
 import { Field } from '../components/Field'
 import { PhotoManager } from '../components/PhotoManager'
 import { PhotoPicker } from '../components/PhotoPicker'
@@ -10,34 +11,33 @@ import { CATEGORIES, STATUSES, type Category, type Listing, type Status } from '
 import { createListing, errorMessage, fetchListing, loadErrorMessage, updateListing, uploadPhotos, type ListingInput } from '../listings'
 import { parsePrice, toPriceInput } from '../price'
 
-type FieldName = 'title' | 'description' | 'price' | 'category' | 'city' | 'status'
+type FieldName = 'title' | 'description' | 'price' | 'category' | 'status'
 type Values = Record<FieldName, string>
-type Errors = Partial<Record<FieldName, string>>
+type Errors = Partial<Record<FieldName | 'commune', string>>
 
-const EMPTY: Values = { title: '', description: '', price: '', category: '', city: '', status: 'available' }
+const EMPTY: Values = { title: '', description: '', price: '', category: '', status: 'available' }
 
-function validate(values: Values): Errors {
+function validate(values: Values, commune: CommuneChoice | null): Errors {
   const errors: Errors = {}
   const title = values.title.trim()
-  const city = values.city.trim()
 
   if (!title) errors.title = 'Indiquez un titre.'
   else if (title.length > 120) errors.title = 'Raccourcissez le titre à 120 caractères maximum.'
   if (values.description.length > 2000) errors.description = 'Raccourcissez la description à 2 000 caractères maximum.'
   if (parsePrice(values.price) === null) errors.price = 'Indiquez un prix supérieur à 0 €, par exemple 85 ou 85,50.'
   if (!Object.hasOwn(CATEGORIES, values.category)) errors.category = 'Choisissez une catégorie.'
-  if (!city) errors.city = 'Indiquez une ville.'
-  else if (city.length > 80) errors.city = 'Raccourcissez la ville à 80 caractères maximum.'
+  if (!commune) errors.commune = 'Choisissez une commune dans la liste.'
 
   return errors
 }
 
-const toInput = (values: Values): ListingInput => ({
+const toInput = (values: Values, commune: CommuneChoice): ListingInput => ({
   title: values.title.trim(),
   description: values.description,
   priceCents: parsePrice(values.price) as number,
   category: values.category as Category,
-  city: values.city.trim(),
+  cityCode: commune.cityCode,
+  postalCode: commune.postalCode,
   status: values.status as Status,
 })
 
@@ -46,12 +46,20 @@ const fromListing = (listing: Listing): Values => ({
   description: listing.description,
   price: toPriceInput(listing.priceCents),
   category: listing.category,
-  city: listing.city,
   status: listing.status,
 })
 
+/** Commune déjà choisie, ou null pour une ancienne annonce en texte libre (spec 004). */
+const communeOf = (listing: Listing): CommuneChoice | null =>
+  listing.cityCode && listing.postalCode
+    ? { cityCode: listing.cityCode, postalCode: listing.postalCode, name: listing.city, label: `${listing.city} (${listing.postalCode})` }
+    : null
+
 type FormProps = {
   initial: Values
+  initialCommune: CommuneChoice | null
+  /** Ville en texte libre d'une ancienne annonce, à remplacer par une commune */
+  legacyCity?: string
   editing: boolean
   cancelTo: string
   onSubmit: (input: ListingInput) => Promise<void>
@@ -59,8 +67,9 @@ type FormProps = {
   photos?: { files: File[]; onChange: (files: File[]) => void }
 }
 
-function ListingForm({ initial, editing, cancelTo, onSubmit, photos }: FormProps) {
+function ListingForm({ initial, initialCommune, legacyCity, editing, cancelTo, onSubmit, photos }: FormProps) {
   const [values, setValues] = useState(initial)
+  const [commune, setCommune] = useState(initialCommune)
   const [errors, setErrors] = useState<Errors>({})
   const [serverError, setServerError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -75,14 +84,14 @@ function ListingForm({ initial, editing, cancelTo, onSubmit, photos }: FormProps
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    const found = validate(values)
+    const found = validate(values, commune)
     setErrors(found)
     setServerError(null)
     if (Object.keys(found).length > 0) return
 
     setSaving(true)
     try {
-      await onSubmit(toInput(values))
+      await onSubmit(toInput(values, commune as CommuneChoice))
     } catch (err) {
       setServerError(errorMessage(err))
       setSaving(false)
@@ -104,7 +113,16 @@ function ListingForm({ initial, editing, cancelTo, onSubmit, photos }: FormProps
           </option>
         ))}
       </Field>
-      <Field label="Ville" placeholder="Lyon" autoComplete="address-level2" maxLength={80} required {...bind('city')} />
+      <CommuneField
+        label="Commune"
+        value={commune}
+        onChange={(choice) => {
+          setCommune(choice)
+          if (choice) setErrors((e) => ({ ...e, commune: undefined }))
+        }}
+        error={errors.commune}
+        hint={legacyCity && !commune ? `Ancienne ville : « ${legacyCity} ». Choisissez la commune correspondante.` : 'Tapez le nom ou le code postal, puis choisissez dans la liste'}
+      />
       <Field
         as="textarea"
         label="Description"
@@ -167,7 +185,7 @@ export function NewListingPage() {
 
   return (
     <FormLayout title="Publier une annonce" backTo="/listings" backLabel="Mes annonces">
-      <ListingForm initial={EMPTY} editing={false} cancelTo="/listings" onSubmit={publish} photos={{ files, onChange: setFiles }} />
+      <ListingForm initial={EMPTY} initialCommune={null} editing={false} cancelTo="/listings" onSubmit={publish} photos={{ files, onChange: setFiles }} />
     </FormLayout>
   )
 }
@@ -198,6 +216,8 @@ export function EditListingPage() {
     const changes = Object.fromEntries(
       Object.entries(input).filter(([key, value]) => listing[key as keyof ListingInput] !== value),
     ) as Partial<ListingInput>
+    // Commune et code postal vont toujours ensemble (le serveur refuse l'un sans l'autre)
+    if ('cityCode' in changes || 'postalCode' in changes) Object.assign(changes, { cityCode: input.cityCode, postalCode: input.postalCode })
 
     if (Object.keys(changes).length > 0) await updateListing(listing.id, changes)
     navigate(`/listings/${listing.id}`, {
@@ -216,7 +236,7 @@ export function EditListingPage() {
       ) : (
         <>
           {flashError && <Alert type="error">{flashError}</Alert>}
-          <ListingForm key={listing.id} initial={fromListing(listing)} editing cancelTo={`/listings/${listing.id}`} onSubmit={save} />
+          <ListingForm key={listing.id} initial={fromListing(listing)} initialCommune={communeOf(listing)} legacyCity={listing.cityCode ? undefined : listing.city} editing cancelTo={`/listings/${listing.id}`} onSubmit={save} />
           <PhotoManager listing={listing} onChange={setListing} />
         </>
       )}

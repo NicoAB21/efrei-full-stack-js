@@ -5,7 +5,7 @@ import { MAX_FAVORITES } from '../schemas/favorite.js'
 
 // Toutes les requêtes filtrent sur userId : on ne lit et ne modifie que SES favoris (isolation, comme US3).
 
-const publicFields = 'title description priceCents category city status createdAt updatedAt ownerId photos'
+const publicFields = 'title description priceCents category city cityCode postalCode status createdAt updatedAt ownerId photos'
 
 /** Favoris du plus récent au plus ancien ; annonce supprimée = écartée, vendue = gardée (status "sold"). */
 export async function list(userId: string) {

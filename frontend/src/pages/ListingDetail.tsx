@@ -107,7 +107,7 @@ export function ListingDetail() {
             Catégorie<b>{CATEGORIES[listing.category]}</b>
           </div>
           <div>
-            Ville<b>{listing.city}</b>
+            Commune<b>{listing.city}{listing.postalCode && ` (${listing.postalCode})`}</b>
           </div>
           <div>
             Modifiée le<b>{longDate.format(new Date(listing.updatedAt))}</b>

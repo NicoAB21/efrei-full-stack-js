@@ -14,7 +14,7 @@ test('liste publique : tous les vendeurs, disponibles seulement, ordre et aucune
   const res = await request(app).get('/api/public/listings').expect(200)
   expect(res.body.items.map((item: { id: string }) => item.id)).toEqual([newer.id, older.id])
   for (const item of res.body.items) {
-    expect(Object.keys(item).sort()).toEqual(['id', 'ownerId', 'title', 'description', 'priceCents', 'category', 'city', 'status', 'createdAt', 'updatedAt', 'photos'].sort())
+    expect(Object.keys(item).sort()).toEqual(['id', 'ownerId', 'title', 'description', 'priceCents', 'category', 'city', 'cityCode', 'postalCode', 'status', 'createdAt', 'updatedAt', 'photos'].sort())
   }
 })
 
@@ -35,6 +35,8 @@ test('filtres cumulés, prix inclusifs et recherche dans la description', async 
   expect(res.body.items.map((item: { id: string }) => item.id)).toEqual([match.id])
 })
 
+// Les annonces créées directement en base ci-dessus n'ont pas de cityCode : ce sont des « anciennes » annonces
+// en texte libre, retrouvées par le repli sur le texte de la ville.
 test('mot-clé et ville traitent les caractères regex comme du texte', async () => {
   const match = await create({ title: 'Lot [.*] + accessoires', city: 'Paris (centre)' })
   await create({ title: 'Autre lot', city: 'Paris centre' })
@@ -44,7 +46,7 @@ test('mot-clé et ville traitent les caractères regex comme du texte', async ()
 
 test.each([
   { category: 'inconnue' }, { minPrice: '1.5' }, { maxPrice: 'abc' }, { minPrice: 0 },
-  { minPrice: -1 }, { maxPrice: '9007199254740992' }, { city: 'x'.repeat(81) },
+  { minPrice: -1 }, { maxPrice: '9007199254740992' }, { city: 'x'.repeat(81) }, { cityCode: 'Lyon' },
   { q: 'x'.repeat(101) }, { other: 'x' }, { minPrice: 200, maxPrice: 100 },
   { minPrice: '' }, { category: ['loisirs', 'maison'] },
 ])('refuse les filtres invalides %j', async (query) => {
@@ -72,4 +74,35 @@ test('recherche sans résultat et routes privées toujours protégées', async (
   await request(app).get(`/api/listings/${id}`).expect(401)
   await request(app).patch(`/api/listings/${id}`).send({ title: 'Autre' }).expect(401)
   await request(app).delete(`/api/listings/${id}`).expect(401)
+})
+
+describe('spec 004 : recherche par commune', () => {
+  // Annonces rattachées comme le ferait l'API (nom officiel + clé normalisée)
+  const inCommune = (cityCode: string, postalCode: string, city: string, cityKey: string, title = 'Vélo') =>
+    create({ title, cityCode, postalCode, city, cityKey })
+
+  test('city=lyon, LYON ou cityCode : toutes les annonces de Lyon, tous codes postaux', async () => {
+    const a = await inCommune('69123', '69001', 'Lyon', 'lyon')
+    const b = await inCommune('69123', '69003', 'Lyon', 'lyon')
+    await inCommune('42218', '42000', 'Saint-Étienne', 'saint etienne')
+    for (const query of [{ city: 'lyon' }, { city: 'LYON' }, { cityCode: '69123' }]) {
+      const res = await request(app).get('/api/public/listings').query(query).expect(200)
+      expect(res.body.items.map((i: { id: string }) => i.id).sort()).toEqual([a.id, b.id].sort())
+    }
+  })
+
+  test('accents et tirets ignorés : « saint-étienne » trouve Saint-Étienne, pas Saint-Étienne-de-…', async () => {
+    const se = await inCommune('42218', '42000', 'Saint-Étienne', 'saint etienne')
+    await inCommune('38441', '38590', 'Saint-Étienne-de-Saint-Geoirs', 'saint etienne de saint geoirs')
+    const res = await request(app).get('/api/public/listings').query({ city: 'saint-étienne' }).expect(200)
+    expect(res.body.items.map((i: { id: string }) => i.id)).toEqual([se.id])
+  })
+
+  test('ville et mot-clé se cumulent (ET, pas OU)', async () => {
+    const match = await inCommune('69123', '69001', 'Lyon', 'lyon', 'Vélo de ville')
+    await inCommune('69123', '69002', 'Lyon', 'lyon', 'Canapé')
+    await inCommune('42218', '42000', 'Saint-Étienne', 'saint etienne', 'Vélo de course')
+    const res = await request(app).get('/api/public/listings').query({ city: 'lyon', q: 'vélo' }).expect(200)
+    expect(res.body.items.map((i: { id: string }) => i.id)).toEqual([match.id])
+  })
 })

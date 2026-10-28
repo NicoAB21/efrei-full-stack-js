@@ -52,7 +52,7 @@ function Detail({ id }: { id: string }) {
           <PriceTag cents={listing.priceCents} size="lg" />
           <div className="facts">
             <div>Catégorie<b>{CATEGORIES[listing.category]}</b></div>
-            <div>Ville<b>{listing.city}</b></div>
+            <div>Commune<b>{listing.city}{listing.postalCode && ` (${listing.postalCode})`}</b></div>
             <div>Publiée le<b>{date.format(new Date(listing.createdAt))}</b></div>
           </div>
           <p style={{ whiteSpace: 'pre-line', overflowWrap: 'anywhere' }}>

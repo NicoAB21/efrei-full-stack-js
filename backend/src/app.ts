@@ -8,6 +8,7 @@ import { listingsRouter } from './routes/listings.js'
 import { authRouter } from './routes/auth.js'
 import { publicRouter } from './routes/public.js'
 import { favoritesRouter } from './routes/favorites.js'
+import { communesRouter } from './routes/communes.js'
 import { uploadsDir } from './photos/storage.js'
 
 const openapi = parse(readFileSync(new URL('../openapi.yaml', import.meta.url), 'utf8'))
@@ -30,6 +31,7 @@ export function createApp() {
   app.use('/api/auth', authRouter)
   app.use('/api/public/listings', publicRouter)
   app.use('/api/favorites', favoritesRouter)
+  app.use('/api/communes', communesRouter)
 
   // Photos d'annonces : fichiers statiques, sans liste du dossier, jamais interprétés autrement qu'en image
   app.use(

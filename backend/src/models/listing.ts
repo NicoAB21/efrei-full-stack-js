@@ -24,6 +24,10 @@ const listingSchema = new Schema(
     priceCents: { type: Number, required: true },
     category: { type: String, enum: CATEGORIES, required: true },
     city: { type: String, required: true },
+    // Commune officielle (spec 004) ; null pour les anciennes annonces non rattachées
+    cityCode: { type: String, default: null },
+    postalCode: { type: String, default: null },
+    cityKey: { type: String }, // nom normalisé, pour la recherche ; jamais renvoyé
     status: { type: String, enum: STATUSES, default: 'available' },
     photos: {
       type: [photoSchema],
@@ -36,5 +40,7 @@ const listingSchema = new Schema(
 
 listingSchema.index({ ownerId: 1, createdAt: -1 })
 listingSchema.index({ status: 1, createdAt: -1 })
+listingSchema.index({ status: 1, cityKey: 1, createdAt: -1 })
+listingSchema.index({ status: 1, cityCode: 1, createdAt: -1 })
 
 export const Listing = model('Listing', listingSchema)

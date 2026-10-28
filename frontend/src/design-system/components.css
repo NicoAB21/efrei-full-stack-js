@@ -243,13 +243,14 @@ img, svg { display: block; max-width: 100%; }
 
 /* ——— Hero (aplat orange + étiquette en filigrane) ——— */
 .hero {
-  position: relative; overflow: hidden; isolation: isolate;
-  background: var(--tag); color: #fff; border-radius: var(--r-lg); padding: 48px 44px;
-}
-.hero::after {
-  content: ""; position: absolute; right: -60px; top: 50%; width: 420px; height: 240px; z-index: -1;
-  translate: 0 -50%; rotate: -12deg; background: rgb(255 255 255 / 0.1);
-  clip-path: polygon(70px 0, 100% 0, 100% 100%, 70px 100%, 0 50%); border-radius: 0 28px 28px 0;
+  /* Étiquette en filigrane = image de fond : découpée par les coins arrondis sans overflow: hidden,
+     pour que la liste de suggestions de la recherche puisse dépasser du bandeau */
+  position: relative;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 360'%3E%3Cg transform='rotate(-12 230 180)'%3E%3Cpath d='M90 60H420a28 28 0 0 1 28 28v184a28 28 0 0 1-28 28H90L20 180z' fill='white' fill-opacity='.1'/%3E%3C/g%3E%3C/svg%3E")
+      right -60px center / 460px auto no-repeat,
+    var(--tag);
+  color: #fff; border-radius: var(--r-lg); padding: 48px 44px;
 }
 .hero h1 { font-size: var(--fs-display); max-width: 14ch; }
 .hero p { font-size: 18px; margin: var(--s-3) 0 var(--s-5); max-width: 46ch; color: var(--tag-soft); }
@@ -267,7 +268,7 @@ img, svg { display: block; max-width: 100%; }
   font: 16px var(--font); color: var(--text); background: transparent;
 }
 .hero-search input:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
-.hero-search label + label { border-left: 1px solid var(--line); }
+.hero-search label + label, .hero-search label + .combobox { border-left: 1px solid var(--line); }
 
 /* ——— Puces (villes, filtres rapides) ——— */
 .chips { display: flex; flex-wrap: wrap; gap: var(--s-2); }
@@ -333,6 +334,25 @@ details.panel > summary { cursor: pointer; font-weight: 700; padding-block: 11px
 .field-hint { font-size: var(--fs-sm); color: var(--text-2); }
 .field-error { font-size: var(--fs-sm); color: var(--danger); font-weight: 700; }
 
+/* ——— Champ avec suggestions (commune) ——— */
+.combobox { position: relative; }
+.combobox-input { position: relative; display: flex; align-items: center; }
+.combobox-input svg { position: absolute; left: 14px; color: var(--text-2); pointer-events: none; }
+.field .combobox-input input { padding-left: 42px; }
+.combobox-list {
+  position: absolute; z-index: 15; left: 0; right: 0; top: calc(100% - 4px); max-height: 280px; overflow-y: auto;
+  margin: 0; padding: var(--s-1); list-style: none;
+  background: var(--surface); color: var(--text); /* couleur fixe : sinon hérite du blanc du hero */
+  border: 1px solid var(--line); border-radius: var(--r-sm); box-shadow: var(--shadow); text-align: left;
+}
+.combobox-list[hidden] { display: none; }
+.combobox-option { padding: 12px; border-radius: 8px; cursor: pointer; min-height: 44px; line-height: 1.35; } /* texte continu : le département suit le nom */
+.combobox-option:hover, .combobox-option[aria-selected="true"] { background: var(--tag-soft); color: var(--tag-dk); }
+/* Dans le hero, le champ reprend le style de la pilule de recherche */
+.hero-search .combobox label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.hero-search .combobox input { border: 0; background: transparent; min-height: 48px; border-radius: var(--r-pill); }
+.hero-search .combobox { gap: 0; }
+
 /* ——— Messages ——— */
 .alert { display: flex; gap: 10px; align-items: flex-start; padding: 14px 18px; border-radius: var(--r-sm); font-size: 14px; font-weight: 500; }
 .alert svg { flex: none; margin-top: 1px; }
@@ -365,7 +385,7 @@ details.panel > summary { cursor: pointer; font-weight: 700; padding-block: 11px
   .hero { padding: 32px 24px; }
   .steps { grid-template-columns: 1fr; padding: 28px 24px; }
   .hero-search { grid-template-columns: 1fr; border-radius: var(--r-md); }
-  .hero-search label + label { border-left: 0; border-top: 1px solid var(--line); }
+  .hero-search label + label, .hero-search label + .combobox { border-left: 0; border-top: 1px solid var(--line); }
   .trust { grid-template-columns: 1fr; }
   .cta-band { padding: var(--s-5); }
   /* 2 cartes par ligne sur mobile : on voit plusieurs annonces à la fois */

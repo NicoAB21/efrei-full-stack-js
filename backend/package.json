@@ -5,7 +5,9 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "data:communes": "tsx scripts/fetch-communes.ts",
+    "migrate:communes": "tsx scripts/migrate-communes.ts"
   },
   "type": "module",
   "private": true,

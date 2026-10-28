@@ -14,6 +14,8 @@ tags:
   - name: listings
   - name: public
     description: Vitrine publique (US4), sans authentification
+  - name: communes
+    description: Référentiel officiel des communes (spec 004), public
   - name: favorites
     description: Favoris liés au compte (bonus, spec 002)
 
@@ -151,7 +153,8 @@ paths:
       security: []
       parameters:
         - { name: category, in: query, schema: { $ref: '#/components/schemas/Category' } }
-        - { name: city, in: query, schema: { type: string, maxLength: 80 } }
+        - { name: city, in: query, description: Nom de commune (casse, accents et tirets ignorés ; toutes ses annonces), schema: { type: string, maxLength: 80 } }
+        - { name: cityCode, in: query, description: Code officiel de la commune, schema: { type: string, pattern: '^[0-9][0-9AB][0-9]{3}$' } }
         - { name: q, in: query, description: Mot-clé (titre ou description), schema: { type: string, maxLength: 100 } }
         - { name: minPrice, in: query, description: En centimes, schema: { type: integer, minimum: 1 } }
         - { name: maxPrice, in: query, description: En centimes, schema: { type: integer, minimum: 1 } }
@@ -327,6 +330,32 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /api/communes:
+    get:
+      tags: [communes]
+      summary: Suggestions de communes officielles (par début de nom ou code postal)
+      security: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: 2 à 60 caractères ; casse, accents et tirets ignorés ; chiffres = code postal
+          schema: { type: string, minLength: 2, maxLength: 60 }
+      responses:
+        '200':
+          description: 20 suggestions maximum, une par couple commune / code postal
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    maxItems: 20
+                    items: { $ref: '#/components/schemas/CommuneSuggestion' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+
 security:
   - bearerAuth: []
 
@@ -372,17 +401,18 @@ components:
     ListingCreate:
       type: object
       additionalProperties: false
-      required: [title, priceCents, category, city]
+      required: [title, priceCents, category, cityCode, postalCode]
       properties:
         title: { type: string, minLength: 1, maxLength: 120, description: Espaces retirés avant contrôle }
         description: { type: string, maxLength: 2000, default: '' }
         priceCents: { type: integer, minimum: 1, maximum: 9007199254740991 }
         category: { $ref: '#/components/schemas/Category' }
-        city: { type: string, minLength: 1, maxLength: 80 }
+        cityCode: { type: string, pattern: '^[0-9][0-9AB][0-9]{3}$', description: Code officiel (INSEE) de la commune, ex. 69123 pour Lyon }
+        postalCode: { type: string, pattern: '^[0-9]{5}$', description: 'Code postal, doit appartenir à la commune' }
         status: { $ref: '#/components/schemas/Status' }
 
     ListingUpdate:
-      description: Mêmes champs que ListingCreate, tous facultatifs, au moins un requis
+      description: Mêmes champs que ListingCreate, tous facultatifs, au moins un requis ; cityCode et postalCode vont ensemble
       type: object
       additionalProperties: false
       minProperties: 1
@@ -391,7 +421,8 @@ components:
         description: { type: string, maxLength: 2000 }
         priceCents: { type: integer, minimum: 1, maximum: 9007199254740991 }
         category: { $ref: '#/components/schemas/Category' }
-        city: { type: string, minLength: 1, maxLength: 80 }
+        cityCode: { type: string, pattern: '^[0-9][0-9AB][0-9]{3}$', description: Code officiel (INSEE) de la commune, ex. 69123 pour Lyon }
+        postalCode: { type: string, pattern: '^[0-9]{5}$', description: 'Code postal, doit appartenir à la commune' }
         status: { $ref: '#/components/schemas/Status' }
 
     Listing:
@@ -404,7 +435,9 @@ components:
         description: { type: string }
         priceCents: { type: integer }
         category: { $ref: '#/components/schemas/Category' }
-        city: { type: string }
+        city: { type: string, description: Nom officiel de la commune (texte d'origine pour une ancienne annonce non rattachée) }
+        cityCode: { type: string, nullable: true }
+        postalCode: { type: string, nullable: true }
         status: { $ref: '#/components/schemas/Status' }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
@@ -439,6 +472,16 @@ components:
         cardUrl: { type: string, example: /uploads/6f1c2e3a-…-480.webp }
         width: { type: integer }
         height: { type: integer }
+
+    CommuneSuggestion:
+      type: object
+      required: [cityCode, name, postalCode, department, label]
+      properties:
+        cityCode: { type: string, example: '69123' }
+        name: { type: string, example: Lyon }
+        postalCode: { type: string, example: '69003' }
+        department: { type: string, example: '69' }
+        label: { type: string, example: Lyon (69003) }
 
     Error:
       type: object

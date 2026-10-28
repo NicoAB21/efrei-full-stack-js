@@ -1,7 +1,8 @@
 import { ApiError, apiFetch } from './api'
 import type { Listing } from './constants'
 
-export type ListingInput = Pick<Listing, 'title' | 'description' | 'priceCents' | 'category' | 'city' | 'status'>
+// La commune est envoyée par code officiel + code postal ; le serveur en déduit le nom (spec 004)
+export type ListingInput = Pick<Listing, 'title' | 'description' | 'priceCents' | 'category' | 'status'> & { cityCode: string; postalCode: string }
 
 const json = (method: string, data: object): RequestInit => ({ method, body: JSON.stringify(data) })
 

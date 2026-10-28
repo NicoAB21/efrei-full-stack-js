@@ -52,7 +52,7 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST $API/auth/register \
 
 ID=$(curl -s -X POST $API/listings -H "Authorization: Bearer $TOKEN_A" \
   -H 'Content-Type: application/json' \
-  -d '{"title":"Vélo de ville","priceCents":8500,"category":"loisirs","city":"Lyon"}' \
+  -d '{"title":"Vélo de ville","priceCents":8500,"category":"loisirs","cityCode":"69123","postalCode":"69001"}' \
   | jq -r .id)                                                                  # 201
 
 curl -s -X PATCH $API/listings/$ID -H "Authorization: Bearer $TOKEN_A" \

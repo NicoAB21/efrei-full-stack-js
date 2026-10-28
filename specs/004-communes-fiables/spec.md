@@ -107,7 +107,7 @@ affichée avec son texte et, à la modification, le vendeur doit choisir une com
 
 ### Edge Cases
 
-- Communes d'outre-mer (ex. 97411 Saint-Pierre, La Réunion) : proposées comme les autres.
+- Communes d'outre-mer (ex. Saint-Denis de La Réunion, code postal 97400) : proposées comme les autres.
 - Communes homonymes (plusieurs « Saint-Denis ») : distinguées par le code postal et le département
   dans les suggestions.
 - Paris, Lyon, Marseille : une seule commune par ville, un code postal par arrondissement.

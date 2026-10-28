@@ -16,7 +16,7 @@ async function register(email: string): Promise<Account> {
 }
 const as = (a: Account) => ({ Authorization: `Bearer ${a.token}` })
 async function publish(a: Account, title = 'Vélo de ville') {
-  const res = await request(app).post('/api/listings').set(as(a)).send({ title, priceCents: 8500, category: 'loisirs', city: 'Lyon' })
+  const res = await request(app).post('/api/listings').set(as(a)).send({ title, priceCents: 8500, category: 'loisirs', cityCode: '69123', postalCode: '69001' })
   return res.body.id as string
 }
 

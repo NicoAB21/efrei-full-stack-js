@@ -14,6 +14,7 @@ Projet du module EFREI « Full Stack JS » (M1, octobre 2026), réalisé par Nic
 | US4 | **Vitrine** : annonces disponibles de tous les vendeurs, recherche (mot-clé, ville), catégories, fourchette de prix, détail sans donnée privée | public |
 | + | **Favoris** liés au compte : cœur sur les cartes et le détail, page « Favoris », reprise des favoris du navigateur à la connexion (spec 002) | connecté (navigateur pour un visiteur) |
 | + | **Photos** : 0 à 5 par annonce (JPEG, PNG, WebP vérifiés, métadonnées GPS retirées), photo principale sur les cartes, galerie sur le détail (spec 003) | propriétaire / public |
+| + | **Communes officielles** : la ville se choisit dans les suggestions (nom ou code postal), vérifiée par le serveur ; recherche par commune sans tenir compte des accents (spec 004) | propriétaire / public |
 | + | Sélections « Petits prix » et « Près de chez vous » | public |
 
 Pages : `/` (annonces), `/annonces/:id` (détail public), `/favoris`, `/login`, `/register`, `/listings` (mes annonces), `/listings/new`, `/listings/:id`, `/listings/:id/edit`, `/design` (design system).
@@ -65,6 +66,8 @@ backend/   Express 5 + TypeScript : routes → contrôleurs → services → mod
 | `public.test.ts` | vitrine : jamais d'annonce vendue, filtres, aucune donnée privée |
 | `favorites.test.ts` | favoris : idempotence, 200 maximum, vendue gardée, supprimée retirée, import, isolation A/B |
 | `photos.test.ts` | photos : formats refusés (SVG, faux JPEG…), 5 Mo, 5 photos, GPS retiré, tout ou rien, ordre, suppression des fichiers, isolation A/B |
+| `communes.test.ts` | communes : suggestions (« lyo », code postal, accents, homonymes), commune inventée ou code postal incohérent refusés |
+| `migrate-communes.test.ts` | rattachement des anciennes annonces : sans ambiguïté rattachées, les autres laissées |
 | `openapi.test.ts` | chaque route décrite dans Swagger existe vraiment |
 
 Côté front, `npm test` (`node --test`, sans dépendance) vérifie la conversion des prix et `api.ts` : envoi du token, erreurs de connexion, retour à la connexion quand la session expire.
@@ -114,6 +117,8 @@ npm run dev            # http://localhost:5173, proxy /api → :3000
 | `backend/`  | `npm run lint`  | ESLint                      |
 | `backend/`  | `npm run build` | compile vers `dist/`        |
 | `backend/`  | `npm test`      | Jest + Supertest            |
+| `backend/`  | `npm run data:communes` | retélécharge le référentiel des communes (`data/communes.json`, une fois par an) |
+| `backend/`  | `npm run migrate:communes` | rattache les anciennes annonces à une commune (une fois, relançable) |
 | `frontend/` | `npm run dev`   | serveur Vite                |
 | `frontend/` | `npm run lint`  | ESLint                      |
 | `frontend/` | `npm run build` | build de production         |
@@ -173,11 +178,11 @@ Bonus spécifiés avec spec-kit (spec, plan et tâches dans `specs/`) :
 |---|---|---|
 | [`002-favoris`](specs/002-favoris/spec.md) | Favoris liés au compte, page « Favoris », reprise des favoris du navigateur | ✅ fait |
 | [`003-photos-annonces`](specs/003-photos-annonces/spec.md) | 0 à 5 photos par annonce, formats vérifiés, métadonnées retirées | ✅ fait |
-| [`004-communes-fiables`](specs/004-communes-fiables/spec.md) | Communes officielles avec code postal, validées côté serveur | 3 |
+| [`004-communes-fiables`](specs/004-communes-fiables/spec.md) | Communes officielles avec code postal, validées côté serveur | ✅ fait |
 | [`005-paiement-demo`](specs/005-paiement-demo/spec.md) | Paiement Stripe **de démonstration** (mode test), une seule vente par annonce | optionnel, en dernier |
 
 
 - **Photos** stockées sur le disque du serveur (`UPLOADS_DIR`, défaut `backend/uploads/`, ignoré par git) : en production, il faudrait un volume persistant ou un stockage objet.
-- **Ville** en texte libre ; évolution possible : communes officielles via `geo.api.gouv.fr`.
+- **Communes** : référentiel officiel figé dans `backend/data/communes.json` (API Géo, octobre 2026) ; les anciennes annonces ambiguës (ex. « Saint-Denis ») restent en texte libre jusqu'à leur prochaine modification.
 - **Messagerie** acheteur → vendeur (US5) spécifiée mais pas encore réalisée.
 - **Paiement** volontairement hors périmètre (la spec l'exclut) : un vrai paiement entre particuliers demanderait Stripe Connect.

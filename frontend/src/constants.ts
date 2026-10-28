@@ -28,6 +28,9 @@ export type Listing = {
   priceCents: number
   category: Category
   city: string
+  /** Commune officielle (spec 004) ; null pour une ancienne annonce en texte libre */
+  cityCode: string | null
+  postalCode: string | null
   status: Status
   createdAt: string
   updatedAt: string

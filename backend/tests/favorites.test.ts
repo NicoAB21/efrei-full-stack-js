@@ -20,7 +20,7 @@ async function publish(account: Account, title: string): Promise<ListingBody> {
   const res = await request(app)
     .post('/api/listings')
     .set(as(account))
-    .send({ title, priceCents: 8500, category: 'loisirs', city: 'Lyon' })
+    .send({ title, priceCents: 8500, category: 'loisirs', cityCode: '69123', postalCode: '69001' })
   return res.body
 }
 const put = (account: Account, id: string) => request(app).put(`/api/favorites/${id}`).set(as(account))
