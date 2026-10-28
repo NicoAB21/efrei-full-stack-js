@@ -26,7 +26,7 @@ img, svg { display: block; max-width: 100%; }
 /* ——— Utilitaires ——— */
 .wrap { width: 100%; max-width: 1160px; margin: 0 auto; padding: 0 var(--s-5); }
 .stack { display: grid; gap: var(--s-4); }
-.public-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: var(--s-4); }
+.price-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: var(--s-4); }
 .row { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; }
 .muted { color: var(--text-2); }
 .small { font-size: var(--fs-sm); }
@@ -189,8 +189,25 @@ img, svg { display: block; max-width: 100%; }
 .listing-card h3 { font-size: 15px; font-weight: 600; letter-spacing: 0; }
 .listing-card h3 a { color: inherit; text-decoration: none; }
 .listing-card h3 a::after { content: ""; position: absolute; inset: 0; } /* toute la carte est cliquable */
+/* Favori : au-dessus du lien de la carte, en haut à droite de l'image */
+.fav-btn {
+  position: absolute; top: 10px; right: 10px; z-index: 2;
+  display: grid; place-items: center; width: 44px; height: 44px;
+  border: 0; border-radius: 50%; background: var(--surface); color: var(--night);
+  box-shadow: var(--shadow); cursor: pointer; transition: scale var(--t-fast);
+}
+.fav-btn:hover { scale: 1.08; }
+.fav-btn:active { scale: 0.92; }
+.fav-btn[aria-pressed="true"] { color: var(--tag); }
 .listing-card .meta { font-size: var(--fs-sm); color: var(--text-2); }
 .listing-card.is-sold .media svg { opacity: 0.4; }
+
+/* Rangée d'annonces défilante (sélections : petits prix, près de chez vous…) */
+.listing-row {
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(200px, 240px); gap: var(--s-4);
+  overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: var(--s-2);
+}
+.listing-row > * { scroll-snap-align: start; }
 
 /* ——— Tuiles de catégorie ——— */
 .category-tiles { display: grid; gap: var(--s-3); grid-template-columns: repeat(auto-fill, minmax(116px, 1fr)); }
@@ -214,8 +231,67 @@ img, svg { display: block; max-width: 100%; }
 .hero h1 { font-size: var(--fs-display); max-width: 14ch; }
 .hero p { font-size: 18px; margin: var(--s-3) 0 var(--s-5); max-width: 46ch; color: var(--tag-soft); }
 
+/* Recherche dans le hero : pilule blanche */
+.hero-search {
+  display: grid; grid-template-columns: 2fr 1fr auto; gap: var(--s-1);
+  max-width: 720px; margin-top: var(--s-5); padding: 6px;
+  background: var(--surface); border-radius: var(--r-pill); box-shadow: var(--shadow);
+}
+.hero-search label { position: relative; display: flex; align-items: center; }
+.hero-search svg { position: absolute; left: 16px; color: var(--text-2); pointer-events: none; }
+.hero-search input {
+  width: 100%; min-height: 48px; padding: 0 16px 0 44px; border: 0; border-radius: var(--r-pill);
+  font: 16px var(--font); color: var(--text); background: transparent;
+}
+.hero-search input:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
+.hero-search label + label { border-left: 1px solid var(--line); }
+
+/* ——— Puces (villes, filtres rapides) ——— */
+.chips { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 var(--s-4);
+  border: 1px solid var(--line); border-radius: var(--r-pill); background: var(--surface);
+  font: 600 14px var(--font); color: var(--text); text-decoration: none; cursor: pointer;
+}
+.chip:hover, .chip[aria-pressed="true"] { border-color: var(--tag); color: var(--tag-dk); }
+.chip[aria-pressed="true"] { background: var(--tag-soft); }
+.chip .count { color: var(--text-2); font-weight: 500; }
+
+/* ——— Réassurance (3 arguments avec icône) ——— */
+.trust { display: grid; gap: var(--s-4); grid-template-columns: repeat(3, 1fr); }
+.trust li { display: flex; gap: var(--s-3); align-items: flex-start; }
+.trust ul, .trust { list-style: none; margin: 0; padding: 0; }
+.trust .icon { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--tag-soft); color: var(--tag); }
+.trust strong { display: block; }
+
+/* ——— Appel à l'action de fin de page ——— */
+.cta-band {
+  display: flex; flex-wrap: wrap; gap: var(--s-4); align-items: center; justify-content: space-between;
+  padding: var(--s-6); border-radius: var(--r-lg); background: var(--tag-soft);
+}
+.cta-band h2 { max-width: 22ch; }
+
+/* ——— Étapes (bloc bleu nuit « Vendre en 3 étapes ») ——— */
+.steps {
+  display: grid; gap: var(--s-5); grid-template-columns: repeat(3, 1fr);
+  background: var(--night); color: #e2e8f0; border-radius: var(--r-lg); padding: 40px;
+  counter-reset: step;
+}
+.steps h2 { grid-column: 1 / -1; color: #fff; }
+.steps ol { display: contents; list-style: none; }
+.steps li { display: grid; gap: 4px; align-content: start; }
+.steps li::before {
+  counter-increment: step; content: counter(step);
+  display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 6px;
+  border-radius: 50%; background: var(--tag-lt); color: var(--night); font: 900 18px/1 var(--font);
+}
+.steps strong { color: #fff; font-size: 17px; }
+
 /* ——— Panneaux ——— */
 .panel { background: var(--surface); border-radius: var(--r-lg); padding: var(--s-5); display: grid; gap: var(--s-4); box-shadow: var(--shadow); }
+/* Panneau repliable (<details class="panel">) : compact quand il est fermé */
+details.panel:not([open]) { gap: 0; padding-block: var(--s-4); }
+details.panel > summary { cursor: pointer; font-weight: 700; }
 .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: var(--s-2); }
 .facts div { background: var(--soft); border-radius: var(--r-sm); padding: 10px 14px; font-size: var(--fs-sm); color: var(--text-2); }
 .facts b { display: block; color: var(--text); font-size: 15px; }
@@ -252,6 +328,14 @@ img, svg { display: block; max-width: 100%; }
 @media (max-width: 640px) {
   .wrap { padding: 0 var(--s-4); }
   .hero { padding: 32px 24px; }
+  .steps { grid-template-columns: 1fr; padding: 28px 24px; }
+  .hero-search { grid-template-columns: 1fr; border-radius: var(--r-md); }
+  .hero-search label + label { border-left: 0; border-top: 1px solid var(--line); }
+  .trust { grid-template-columns: 1fr; }
+  .cta-band { padding: var(--s-5); }
+  /* 2 cartes par ligne sur mobile : on voit plusieurs annonces à la fois */
+  .listing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4) var(--s-3); }
+  .listing-card .media .price-tag { font-size: 15px; top: 10px; }
   .site-header .wrap { gap: var(--s-2); }
   /* Navigation en icônes seules : le libellé reste lu par les lecteurs d'écran */
   .nav-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

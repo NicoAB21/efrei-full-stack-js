@@ -23,10 +23,12 @@ Le style du front Occaz : blanc cassé, bleu nuit et orange, avec une seule sign
 ## Disposition (reprise de « Bonne affaire »)
 
 - En-tête blanc collant : logo, navigation (icônes seules sur mobile), bouton « Vendre ».
-- Accueil (US4) : hero en aplat orange, tuiles de catégories, grille de cartes carrées.
+- Accueil « Annonces » (US4, `pages/Home.tsx`) : hero orange avec recherche, tuiles de catégories, grille de cartes avec favoris, filtre de prix repliable, « Petits prix » (≤ 40 €), villes les plus présentes, réassurance, « Vendre en 3 étapes », appel à publier.
 - Détail : panneau avec badge de statut, grand prix en étiquette, infos en petites cases.
 - Pied de page bleu nuit avec le logo et le slogan.
 
 ## Écarté pour le MVP
 
-Favoris, badges « Nouveau » et « Prix en baisse » (pas de données pour les alimenter), barre de recherche dans l'en-tête (la recherche arrive avec la vitrine US4), mode sombre (l'orange tombe à 3,45:1 sur fond sombre).
+Badges « Nouveau » et « Prix en baisse » (pas de données pour les alimenter), photos d'annonces (bonus « upload d'images »), barre de recherche dans l'en-tête (la recherche est dans le hero de l'accueil), mode sombre (l'orange tombe à 3,45:1 sur fond sombre).
+
+Les **favoris** existent côté front (cœur sur les cartes de l'accueil), gardés dans le navigateur (`localStorage`) : pas encore de champ en base ni d'API.

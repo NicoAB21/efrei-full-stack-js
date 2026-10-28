@@ -178,7 +178,7 @@ Pendant la Phase 2, Kelyan et Ismael peuvent déjà écrire les tests de leur st
 - [x] T043 [P] [US4] Ajouter `publicQuerySchema` dans `backend/src/schemas/listing.ts` (`category` enum, `city` ≤ 80, `q` ≤ 100, `minPrice`/`maxPrice` entiers ≥ 1 via `z.coerce`, strict)
 - [x] T044 [US4] Ajouter `listPublic(filters)` et `getPublic(id)` dans `backend/src/services/listing.service.ts` (filtre `status: "available"`, tri `createdAt: -1`, `limit(50)`, regex échappée pour `q` et `city`)
 - [x] T045 [US4] Créer `backend/src/routes/public.ts` (sans middleware auth) et le monter sur `/api/public/listings` dans `backend/src/app.ts`
-- [x] T046 [P] [US4] Créer `frontend/src/pages/Home.tsx` : formulaire de filtres labellisé (catégorie, ville, mot-clé, prix min/max en euros), liste en grille responsive, « Aucune annonce » si vide ; route `/` dans `frontend/src/App.tsx`
+- [x] T046 [P] [US4] Créer `frontend/src/pages/Home.tsx` : formulaire de filtres labellisé (catégorie, ville, mot-clé, prix min/max en euros), liste en grille responsive, « Aucune annonce » si vide ; route `/` dans `frontend/src/App.tsx` → **refonte design** (maquette D, Nicolas) : hero avec recherche, tuiles de catégories, filtre de prix repliable, « Petits prix », villes, favoris (`localStorage`), mêmes paramètres d'URL et même API
 - [x] T047 [US4] Créer `frontend/src/pages/PublicListing.tsx` (route `/annonces/:id`) : titre, description, prix, catégorie, ville, date ; aucune donnée vendeur
 
 **Checkpoint**: vitrine publique opérationnelle, MVP intact
