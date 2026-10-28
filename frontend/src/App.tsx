@@ -1,4 +1,4 @@
-import { LayoutGrid, LogIn, Plus, Tag } from 'lucide-react'
+import { Heart, LayoutGrid, LogIn, Plus, Tag } from 'lucide-react'
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router'
 import { Logo } from './components/Logo'
 import { DesignPage } from './pages/DesignPage'
@@ -9,6 +9,9 @@ import { AuthProvider, RequireAuth, useAuth } from './auth'
 import { Login } from './pages/Login'
 import { Register } from './pages/Register'
 import { AccountMenu } from './components/AccountMenu'
+import { FavoritesNotice } from './components/FavoritesNotice'
+import { FavoritesProvider } from './favorites'
+import { Favorites } from './pages/Favorites'
 import { Home } from './pages/Home'
 import { PublicListing } from './pages/PublicListing'
 
@@ -28,7 +31,9 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppContent />
+        <FavoritesProvider>
+          <AppContent />
+        </FavoritesProvider>
       </AuthProvider>
     </BrowserRouter>
   )
@@ -46,6 +51,10 @@ function AppContent() {
               <LayoutGrid size={20} aria-hidden />
               <span className="nav-label">Annonces</span>
             </NavLink>
+            <NavLink to="/favoris" className={navClass}>
+              <Heart size={20} aria-hidden />
+              <span className="nav-label">Favoris</span>
+            </NavLink>
             <NavLink to="/listings" end className={navClass}>
               <Tag size={20} aria-hidden />
               <span className="nav-label">Mes annonces</span>
@@ -58,7 +67,7 @@ function AppContent() {
             )}
             <Link to="/listings/new" className="btn btn-primary btn-sm">
               <Plus size={18} aria-hidden />
-              Vendre
+              <span className="nav-label">Vendre</span>
             </Link>
             {user && <AccountMenu email={user.email} onLogout={logout} />}
           </nav>
@@ -70,6 +79,7 @@ function AppContent() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/annonces/:id" element={<PublicListing />} />
+            <Route path="/favoris" element={<Favorites />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route element={<RequireAuth />}>
@@ -83,6 +93,8 @@ function AppContent() {
           </Routes>
         </div>
       </main>
+
+      <FavoritesNotice />
 
       <footer className="site-footer">
         <div className="wrap">

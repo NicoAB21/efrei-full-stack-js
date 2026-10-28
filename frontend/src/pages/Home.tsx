@@ -9,6 +9,7 @@ import { EmptyState } from '../components/EmptyState'
 import { Field } from '../components/Field'
 import { ListingCard } from '../components/ListingCard'
 import { CATEGORIES, type Category, type Listing } from '../constants'
+import { useFavoriteProps } from '../favorites'
 import { errorMessage } from '../listings'
 import { parsePrice, toPriceInput } from '../price'
 
@@ -22,23 +23,6 @@ const FILTER_KEYS = ['q', 'city', 'category', 'minPrice', 'maxPrice']
 const fetchPublic = async (query: string) =>
   (await apiFetch<{ items: Listing[] }>(`/public/listings${query ? `?${query}` : ''}`)).items
 
-// Favoris : gardés dans le navigateur (pas encore de champ en base ni d'API)
-const FAVORITES_KEY = 'occaz.favorites'
-function useFavorites() {
-  const [ids, setIds] = useState<string[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem(FAVORITES_KEY) ?? '[]')
-    } catch {
-      return []
-    }
-  })
-  useEffect(() => localStorage.setItem(FAVORITES_KEY, JSON.stringify(ids)), [ids])
-  return (id: string) => ({
-    favorite: ids.includes(id),
-    onToggleFavorite: () => setIds((current) => (current.includes(id) ? current.filter((f) => f !== id) : [...current, id])),
-  })
-}
-
 export function Home() {
   const [params, setParams] = useSearchParams()
   const query = params.toString()
@@ -50,7 +34,7 @@ function Catalogue({ query, search }: { query: string; search: (params: URLSearc
   const params = new URLSearchParams(query)
   const filtered = FILTER_KEYS.some((key) => params.has(key))
   const category = params.get('category') as Category | null
-  const favoriteProps = useFavorites()
+  const favoriteProps = useFavoriteProps()
 
   const [items, setItems] = useState<Listing[] | null>(null)
   const [error, setError] = useState('')
@@ -212,7 +196,7 @@ function Catalogue({ query, search }: { query: string; search: (params: URLSearc
         ) : (
           <div className="listing-grid">
             {items.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} to={`/annonces/${listing.id}`} {...favoriteProps(listing.id)} />
+              <ListingCard key={listing.id} listing={listing} to={`/annonces/${listing.id}`} {...favoriteProps(listing)} />
             ))}
           </div>
         )}
@@ -231,7 +215,7 @@ function Catalogue({ query, search }: { query: string; search: (params: URLSearc
           </div>
           <div className="listing-row" tabIndex={0} aria-label="Annonces à petits prix, défilement horizontal">
             {smallPrices.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} to={`/annonces/${listing.id}`} {...favoriteProps(listing.id)} />
+              <ListingCard key={listing.id} listing={listing} to={`/annonces/${listing.id}`} {...favoriteProps(listing)} />
             ))}
           </div>
         </section>

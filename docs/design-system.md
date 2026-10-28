@@ -31,4 +31,4 @@ Le style du front Occaz : blanc cassé, bleu nuit et orange, avec une seule sign
 
 Badges « Nouveau » et « Prix en baisse » (pas de données pour les alimenter), photos d'annonces (bonus « upload d'images »), barre de recherche dans l'en-tête (la recherche est dans le hero de l'accueil), mode sombre (l'orange tombe à 3,45:1 sur fond sombre).
 
-Les **favoris** existent côté front (cœur sur les cartes de l'accueil), gardés dans le navigateur (`localStorage`) : pas encore de champ en base ni d'API.
+Les **favoris** (spec 002) : cœur `.fav-btn` sur les cartes, bouton « Ajouter aux favoris » sur le détail, page « Favoris », message flottant `.toast` (invitation à se connecter, erreur).

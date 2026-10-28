@@ -1,4 +1,5 @@
 import { notFound } from '../errors.js'
+import { Favorite } from '../models/favorite.js'
 import { Listing } from '../models/listing.js'
 import type { ListingCreateInput, ListingUpdateInput } from '../schemas/listing.js'
 import type { PublicQuery } from '../schemas/listing.js'
@@ -28,6 +29,7 @@ export async function update(ownerId: string, id: string, data: ListingUpdateInp
 export async function remove(ownerId: string, id: string) {
   const listing = await Listing.findOneAndDelete({ _id: id, ownerId })
   if (!listing) throw notFoundListing()
+  await Favorite.deleteMany({ listingId: id }) // une annonce supprimée disparaît des favoris
 }
 
 const literalPattern = (value: string) => new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')

@@ -12,9 +12,10 @@ Projet du module EFREI « Full Stack JS » (M1, octobre 2026), réalisé par Nic
 | US2 | **Mes annonces** : publier, lister, consulter, modifier (prix, statut « vendue »…), supprimer avec confirmation | connecté |
 | US3 | **Isolation** : un vendeur ne peut ni voir, ni modifier, ni supprimer les annonces d'un autre (404) | serveur |
 | US4 | **Vitrine** : annonces disponibles de tous les vendeurs, recherche (mot-clé, ville), catégories, fourchette de prix, détail sans donnée privée | public |
-| + | Favoris (cœur sur les cartes, gardés dans le navigateur), sélections « Petits prix » et « Près de chez vous » | public |
+| + | **Favoris** liés au compte : cœur sur les cartes et le détail, page « Favoris », reprise des favoris du navigateur à la connexion (spec 002) | connecté (navigateur pour un visiteur) |
+| + | Sélections « Petits prix » et « Près de chez vous » | public |
 
-Pages : `/` (annonces), `/annonces/:id` (détail public), `/login`, `/register`, `/listings` (mes annonces), `/listings/new`, `/listings/:id`, `/listings/:id/edit`, `/design` (design system).
+Pages : `/` (annonces), `/annonces/:id` (détail public), `/favoris`, `/login`, `/register`, `/listings` (mes annonces), `/listings/new`, `/listings/:id`, `/listings/:id/edit`, `/design` (design system).
 
 ## Architecture
 
@@ -61,6 +62,7 @@ backend/   Express 5 + TypeScript : routes → contrôleurs → services → mod
 | `listings.test.ts` | CRUD complet, 400 sur chaque entrée invalide, 401 sur chaque route |
 | `isolation.test.ts` | B ne peut rien faire sur l'annonce de A (404 identique à un id inexistant) |
 | `public.test.ts` | vitrine : jamais d'annonce vendue, filtres, aucune donnée privée |
+| `favorites.test.ts` | favoris : idempotence, 200 maximum, vendue gardée, supprimée retirée, import, isolation A/B |
 | `openapi.test.ts` | chaque route décrite dans Swagger existe vraiment |
 
 Côté front, `npm test` (`node --test`, sans dépendance) vérifie la conversion des prix et `api.ts` : envoi du token, erreurs de connexion, retour à la connexion quand la session expire.
@@ -163,18 +165,17 @@ Le contrat d'API de référence est [`specs/001-marketplace-mvp/contracts/openap
 
 ## Limites et évolutions
 
-Bonus spécifiés avec spec-kit (spec écrite, plan et implémentation à venir) :
+Bonus spécifiés avec spec-kit (spec, plan et tâches dans `specs/`) :
 
 | Spec | Bonus | Priorité |
 |---|---|---|
-| [`002-favoris`](specs/002-favoris/spec.md) | Favoris liés au compte, page « Favoris », reprise des favoris du navigateur | 1 |
+| [`002-favoris`](specs/002-favoris/spec.md) | Favoris liés au compte, page « Favoris », reprise des favoris du navigateur | ✅ fait |
 | [`003-photos-annonces`](specs/003-photos-annonces/spec.md) | 0 à 5 photos par annonce, formats vérifiés, métadonnées retirées | 2 |
 | [`004-communes-fiables`](specs/004-communes-fiables/spec.md) | Communes officielles avec code postal, validées côté serveur | 3 |
 | [`005-paiement-demo`](specs/005-paiement-demo/spec.md) | Paiement Stripe **de démonstration** (mode test), une seule vente par annonce | optionnel, en dernier |
 
 
 - **Photos d'annonces** : pas encore d'upload (les cartes affichent le pictogramme de la catégorie). Évolution prévue : `multer`, JPEG/PNG/WebP vérifiés, 5 Mo max.
-- **Favoris** gardés dans le navigateur ; évolution prévue : favoris liés au compte (spec `002-favoris`).
 - **Ville** en texte libre ; évolution possible : communes officielles via `geo.api.gouv.fr`.
 - **Messagerie** acheteur → vendeur (US5) spécifiée mais pas encore réalisée.
 - **Paiement** volontairement hors périmètre (la spec l'exclut) : un vrai paiement entre particuliers demanderait Stripe Connect.

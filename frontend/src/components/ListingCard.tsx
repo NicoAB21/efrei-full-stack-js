@@ -6,8 +6,8 @@ import { PriceTag } from './PriceTag'
 
 type Props = {
   listing: Pick<Listing, 'title' | 'priceCents' | 'category' | 'city' | 'status' | 'createdAt'>
-  /** Lien vers le détail : toute la carte devient cliquable */
-  to: string
+  /** Lien vers le détail : toute la carte devient cliquable ; absent = carte non cliquable (ex. favori vendu) */
+  to?: string
   /** Bouton cœur affiché seulement si onToggleFavorite est fourni (favoris : pas encore dans le modèle) */
   favorite?: boolean
   onToggleFavorite?: () => void
@@ -37,7 +37,7 @@ export function ListingCard({ listing, to, favorite = false, onToggleFavorite }:
         </button>
       )}
       <h3>
-        <Link to={to}>{listing.title}</Link>
+        {to ? <Link to={to}>{listing.title}</Link> : listing.title}
       </h3>
       <p className="meta">
         {listing.city} · {date.format(new Date(listing.createdAt))}

@@ -1,3 +1,4 @@
+import { Heart } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 import { apiFetch } from '../api'
@@ -5,7 +6,9 @@ import { Alert } from '../components/Alert'
 import { BackLink } from '../components/BackLink'
 import { PriceTag } from '../components/PriceTag'
 import { StatusBadge } from '../components/StatusBadge'
+import { useAuth } from '../auth'
 import { CATEGORIES, type Listing } from '../constants'
+import { useFavorites } from '../favorites'
 import { errorMessage, isNotFound } from '../listings'
 
 const date = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' })
@@ -16,6 +19,8 @@ export function PublicListing() {
 }
 
 function Detail({ id }: { id: string }) {
+  const { user } = useAuth()
+  const { isFavorite, toggle } = useFavorites()
   const [listing, setListing] = useState<Listing | null>(null)
   const [error, setError] = useState<{ message: string; missing: boolean } | null>(null)
   useEffect(() => {
@@ -51,6 +56,14 @@ function Detail({ id }: { id: string }) {
           <p style={{ whiteSpace: 'pre-line', overflowWrap: 'anywhere' }}>
             {listing.description || 'Pas de description.'}
           </p>
+          {listing.ownerId !== user?.id && (
+            <div className="row">
+              <button type="button" className="btn btn-secondary" aria-pressed={isFavorite(listing.id)} onClick={() => toggle(listing.id)}>
+                <Heart size={18} fill={isFavorite(listing.id) ? 'currentColor' : 'none'} aria-hidden />
+                {isFavorite(listing.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+              </button>
+            </div>
+          )}
         </article>
       )}
     </div>
