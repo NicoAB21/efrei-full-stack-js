@@ -195,13 +195,13 @@ Pendant la Phase 2, Kelyan et Ismael peuvent déjà écrire les tests de leur st
 
 ### Tests for User Story 5 ⚠️
 
-- [ ] T048 [P] [US5] Écrire `backend/tests/messages.test.ts` : B → 201 sur l'annonce disponible de A ; A le voit dans `GET /api/messages` ; C ne le voit pas ; A sur sa propre annonce → 400 ; annonce `sold` ou inexistante → 404 ; sans token → 401 ; `body` vide, `"   "` ou > 1000 caractères → 400
+- [x] T048 [P] [US5] Écrire `backend/tests/messages.test.ts` : B → 201 sur l'annonce disponible de A ; A le voit dans `GET /api/messages` ; C ne le voit pas ; A sur sa propre annonce → 400 ; annonce `sold` ou inexistante → 404 ; sans token → 401 ; `body` vide, `"   "` ou > 1000 caractères → 400
 
 ### Implementation for User Story 5
 
-- [ ] T049 [P] [US5] Créer `backend/src/models/message.ts` : `listingId`, `senderId`, `recipientId` ObjectId requis ; `body` « après `trim` : 1 à 1000 caractères » ; `timestamps: true` ; index `{ recipientId: 1, createdAt: -1 }`
-- [ ] T050 [US5] Créer `backend/src/services/message.service.ts`, contrôleur et routes : `POST /api/public/listings/:id/messages` (auth requise, `recipientId` = `ownerId` calculé serveur) et `GET /api/messages` (reçus par `req.userId`) ; monter dans `backend/src/app.ts`
-- [ ] T051 [US5] Front : formulaire « Contacter le vendeur » dans `frontend/src/pages/PublicListing.tsx` (masqué si `ownerId === user.id` ou non connecté) et page `frontend/src/pages/Messages.tsx` (route `/messages`)
+- [x] T049 [P] [US5] Créer `backend/src/models/message.ts` : `listingId`, `senderId`, `recipientId` ObjectId requis ; `body` « après `trim` : 1 à 1000 caractères » ; `timestamps: true` ; index `{ recipientId: 1, createdAt: -1 }`
+- [x] T050 [US5] Créer `backend/src/services/message.service.ts`, contrôleur et routes : `POST /api/public/listings/:id/messages` (auth requise, `recipientId` = `ownerId` calculé serveur) et `GET /api/messages` (reçus par `req.userId`) ; monter dans `backend/src/app.ts`
+- [x] T051 [US5] Front : formulaire « Contacter le vendeur » dans `frontend/src/pages/PublicListing.tsx` (masqué si `ownerId === user.id` ou non connecté) et page `frontend/src/pages/Messages.tsx` (route `/messages`)
 
 ---
 

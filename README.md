@@ -12,13 +12,14 @@ Projet du module EFREI « Full Stack JS » (M1, octobre 2026), réalisé par Nic
 | US2 | **Mes annonces** : publier, lister, consulter, modifier (prix, statut « vendue »…), supprimer avec confirmation | connecté |
 | US3 | **Isolation** : un vendeur ne peut ni voir, ni modifier, ni supprimer les annonces d'un autre (404) | serveur |
 | US4 | **Vitrine** : annonces disponibles de tous les vendeurs, recherche (mot-clé, ville), catégories, fourchette de prix, détail sans donnée privée | public |
+| US5 | **Messagerie** : « Contacter le vendeur » depuis le détail d'une annonce, page « Messages reçus » regroupée par annonce | connecté |
 | + | **Favoris** liés au compte : cœur sur les cartes et le détail, page « Favoris », reprise des favoris du navigateur à la connexion (spec 002) | connecté (navigateur pour un visiteur) |
 | + | **Photos** : 0 à 5 par annonce (JPEG, PNG, WebP vérifiés, métadonnées GPS retirées), photo principale sur les cartes, galerie sur le détail (spec 003) | propriétaire / public |
 | + | **Communes officielles** : la ville se choisit dans les suggestions (nom ou code postal), vérifiée par le serveur ; recherche par commune sans tenir compte des accents (spec 004) | propriétaire / public |
 | + | **Paiement de démonstration** (Stripe, mode test) : « Acheter (démo) », vente validée par webhook signé, une seule vente par annonce (l'autre paiement est remboursé), « Mes achats » (spec 005) | connecté |
 | + | Sélections « Petits prix » et « Près de chez vous » | public |
 
-Pages : `/` (accueil), `/recherche` (résultats et filtres), `/annonces/:id` (détail public), `/favoris`, `/login`, `/register`, `/listings` (mes annonces), `/listings/new`, `/listings/:id`, `/listings/:id/edit`, `/achats` et `/achats/:id` (mes achats, récapitulatif), `/design` (design system).
+Pages : `/` (accueil), `/recherche` (résultats et filtres), `/annonces/:id` (détail public), `/favoris`, `/login`, `/register`, `/listings` (mes annonces), `/listings/new`, `/listings/:id`, `/listings/:id/edit`, `/achats` et `/achats/:id` (mes achats, récapitulatif), `/messages` (messages reçus), `/design` (design system).
 
 ## Architecture
 
@@ -30,7 +31,7 @@ backend/   Express 5 + TypeScript : routes → contrôleurs → services → mod
 
 - **Back** ([`backend/src/`](backend/src/)) : `routes/` déclarent les URL et les middlewares, `controllers/` lisent la requête, `services/` portent la logique métier et les règles d'accès, `models/` décrivent les collections. `schemas/` contient la validation Zod, `errors.ts` le format d'erreur unique, `middleware/auth.ts` la vérification du JWT.
 - **Front** ([`frontend/src/`](frontend/src/)) : `pages/` (une par écran), `components/` (briques du design system), `api.ts` (fetch + JWT + gestion du 401), `auth.tsx` (session), `price.ts` (centimes ↔ euros).
-- **Données** : `users` et `listings` ; MCD/MLD dans [`specs/001-marketplace-mvp/data-model.md`](specs/001-marketplace-mvp/data-model.md).
+- **Données** : `users`, `listings` et `messages` ; MCD/MLD dans [`specs/001-marketplace-mvp/data-model.md`](specs/001-marketplace-mvp/data-model.md).
 - **Contrat API** : Swagger sur http://localhost:3000/api/docs, généré depuis [`backend/openapi.yaml`](backend/openapi.yaml) (un test vérifie que chaque route documentée existe).
 
 ## Choix techniques
@@ -66,6 +67,7 @@ backend/   Express 5 + TypeScript : routes → contrôleurs → services → mod
 | `isolation.test.ts` | B ne peut rien faire sur l'annonce de A (404 identique à un id inexistant) |
 | `public.test.ts` | vitrine : jamais d'annonce vendue, filtres, aucune donnée privée |
 | `favorites.test.ts` | favoris : idempotence, 200 maximum, vendue gardée, supprimée retirée, import, isolation A/B |
+| `messages.test.ts` | messagerie : destinataire calculé par le serveur, un tiers ne voit rien, sa propre annonce, annonce vendue ou inexistante, message vide ou trop long, 401 |
 | `photos.test.ts` | photos : formats refusés (SVG, faux JPEG…), 5 Mo, 5 photos, GPS retiré, tout ou rien, ordre, suppression des fichiers, isolation A/B |
 | `communes.test.ts` | communes : suggestions (« lyo », code postal, accents, homonymes), commune inventée ou code postal incohérent refusés |
 | `migrate-communes.test.ts` | rattachement des anciennes annonces : sans ambiguïté rattachées, les autres laissées |
@@ -209,5 +211,5 @@ Bonus spécifiés avec spec-kit (spec, plan et tâches dans `specs/`) :
 
 - **Photos** stockées sur le disque du serveur (`UPLOADS_DIR`, défaut `backend/uploads/`, ignoré par git) : en production, il faudrait un volume persistant ou un stockage objet.
 - **Communes** : référentiel officiel figé dans `backend/data/communes.json` (API Géo, octobre 2026) ; les anciennes annonces ambiguës (ex. « Saint-Denis ») restent en texte libre jusqu'à leur prochaine modification.
-- **Messagerie** acheteur → vendeur (US5) spécifiée mais pas encore réalisée.
+- **Messagerie** à sens unique : l'acheteur écrit au vendeur, mais le vendeur ne peut pas encore répondre dans Occaz (pas de fil de discussion ni de notification).
 - **Paiement** de démonstration seulement : un vrai paiement entre particuliers demanderait Stripe Connect (compte vérifié par vendeur, reversement, frais).

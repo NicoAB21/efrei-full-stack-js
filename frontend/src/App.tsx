@@ -18,6 +18,7 @@ import { PublicListing } from './pages/PublicListing'
 import { Purchases } from './pages/Purchases'
 import { PaymentResult, PaymentReturn } from './pages/PaymentResult'
 import { Search } from './pages/Search'
+import { Messages } from './pages/Messages'
 
 // Page provisoire : chaque story remplace la sienne par la vraie page.
 function Todo({ title, task }: { title: string; task: string }) {
@@ -96,6 +97,7 @@ function AppContent() {
               <Route path="/achats" element={<Purchases />} />
               <Route path="/achats/:id" element={<PaymentResult />} />
               <Route path="/paiement" element={<PaymentReturn />} />
+              <Route path="/messages" element={<Messages />} />
             </Route>
             <Route path="/design" element={<DesignPage />} />
             <Route path="*" element={<Todo title="Page introuvable" task="—" />} />

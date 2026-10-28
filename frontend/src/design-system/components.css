@@ -444,7 +444,7 @@ details.panel > summary { cursor: pointer; font-weight: 700; padding-block: 11px
 .product-meta li { display: flex; gap: 6px; align-items: center; }
 .product-description { margin: 0; white-space: pre-line; overflow-wrap: anywhere; line-height: 1.6; }
 .btn-block { width: 100%; }
-.contact-panel { display: grid; gap: 4px; padding: var(--s-3) var(--s-4); border-radius: var(--r-sm); background: var(--soft); }
+.contact-panel { display: grid; gap: var(--s-3); padding: var(--s-3) var(--s-4); border-radius: var(--r-sm); background: var(--soft); }
 .contact-panel p { margin: 0; }
 .seller-card { grid-template-columns: auto 1fr; align-items: center; gap: var(--s-2) var(--s-3); }
 .seller-card p { margin: 0; }
@@ -526,3 +526,11 @@ details.panel > summary { cursor: pointer; font-weight: 700; padding-block: 11px
 .payment-lines .total { font-size: var(--fs-body); padding-top: var(--s-2); border-top: 1px solid var(--line); }
 .payment-lines .total dt, .payment-lines .total dd { color: var(--text); font-weight: 800; }
 .payment-steps { margin: 0; padding-left: 1.3em; display: grid; gap: var(--s-2); color: var(--text-2); }
+
+.message-count {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--r-pill);
+  background: var(--soft); color: var(--text-2); font-size: 12px; font-weight: 700;
+}
+.message-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-3); }
+.message-list li { display: grid; gap: var(--s-1); padding: var(--s-3) var(--s-4); background: var(--soft); border-radius: var(--r-sm); }
+.message-list p { white-space: pre-line; overflow-wrap: anywhere; }
