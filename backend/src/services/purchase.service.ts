@@ -9,7 +9,7 @@ import { isBuyable } from '../schemas/purchase.js'
 const REUSE_SESSION_MS = 25 * 60 * 1000
 
 // Projection explicite : jamais l'acheteur ni les références Stripe dans les réponses
-const purchaseFields = 'listingId listingTitle priceCents status createdAt confirmedAt'
+const purchaseFields = 'listingId listingTitle listingPhotoUrl priceCents status createdAt confirmedAt'
 
 export async function list(buyerId: string) {
   return Purchase.find({ buyerId }).select(purchaseFields).sort({ createdAt: -1, _id: -1 })
@@ -33,7 +33,13 @@ export async function start(buyerId: string, listingId: string) {
   })
   if (open?.checkoutUrl) return open.checkoutUrl
 
-  const purchase = await Purchase.create({ buyerId, listingId, listingTitle: listing.title, priceCents: listing.priceCents })
+  const purchase = await Purchase.create({
+    buyerId,
+    listingId,
+    listingTitle: listing.title,
+    listingPhotoUrl: listing.photos[0]?.cardUrl ?? null,
+    priceCents: listing.priceCents,
+  })
   try {
     const session = await gateway.createCheckout({ purchaseId: purchase.id, listingId, title: listing.title, priceCents: listing.priceCents })
     await Purchase.updateOne({ _id: purchase._id }, { checkoutSessionId: session.id, checkoutUrl: session.url })

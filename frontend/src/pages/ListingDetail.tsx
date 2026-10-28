@@ -114,7 +114,7 @@ export function ListingDetail() {
 
             {listing.soldOnline && (
               <Alert type="success">
-                Vendue en ligne le {longDate.format(new Date(listing.soldOnline.at))} pour {formatPrice(listing.soldOnline.priceCents)} (paiement de démonstration).
+                Vendue en ligne le {longDate.format(new Date(listing.soldOnline.at))} pour {formatPrice(listing.soldOnline.priceCents)}.
               </Alert>
             )}
 

@@ -461,11 +461,25 @@ details.panel > summary { cursor: pointer; font-weight: 700; padding-block: 11px
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
 
-/* Paiement de démonstration (spec 005) */
-.demo-banner {
-  display: flex; gap: 8px; align-items: center; margin: 0;
-  padding: 10px 14px; border-radius: var(--r-sm);
-  background: var(--tag-lt); color: var(--night); font-size: var(--fs-sm); font-weight: 600;
-}
+/* Paiement (spec 005) : confirmation et « Mes achats » */
 .purchase-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-3); }
-.purchase-list li { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-4); align-items: center; justify-content: space-between; }
+.payment-page { max-width: 640px; margin-inline: auto; gap: var(--s-5); }
+.payment-result { display: grid; justify-items: center; gap: var(--s-3); text-align: center; padding: var(--s-5) 0 var(--s-2); }
+.payment-result p { margin: 0; max-width: 46ch; color: var(--text-2); }
+.payment-result.is-ok svg { color: var(--ok); }
+.payment-result.is-wait svg { color: var(--tag); }
+.payment-result.is-error svg { color: var(--danger); }
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { rotate: 360deg; } }
+.payment-item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--s-4); align-items: center; }
+.payment-item img, .payment-thumb { width: 72px; height: 72px; border-radius: var(--r-sm); object-fit: cover; background: var(--soft); }
+.payment-recap .payment-item img, .payment-recap .payment-thumb { width: 96px; height: 96px; }
+.payment-thumb { display: grid; place-items: center; color: var(--line-strong); }
+.payment-item > div { display: grid; gap: 4px; min-width: 0; }
+.payment-item strong { overflow-wrap: anywhere; }
+.payment-lines { display: grid; gap: var(--s-2); margin: 0; padding-top: var(--s-3); border-top: 1px solid var(--line); }
+.payment-lines div { display: flex; justify-content: space-between; gap: var(--s-4); font-size: var(--fs-sm); color: var(--text-2); }
+.payment-lines dd { margin: 0; color: var(--text); font-weight: 600; }
+.payment-lines .total { font-size: var(--fs-body); padding-top: var(--s-2); border-top: 1px solid var(--line); }
+.payment-lines .total dt, .payment-lines .total dd { color: var(--text); font-weight: 800; }
+.payment-steps { margin: 0; padding-left: 1.3em; display: grid; gap: var(--s-2); color: var(--text-2); }

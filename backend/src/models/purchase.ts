@@ -9,6 +9,7 @@ const purchaseSchema = new Schema(
     buyerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     listingId: { type: Schema.Types.ObjectId, ref: 'Listing', required: true },
     listingTitle: { type: String, required: true },
+    listingPhotoUrl: { type: String, default: null }, // vignette de la photo principale au lancement
     priceCents: { type: Number, required: true },
     status: { type: String, enum: PURCHASE_STATUSES, default: 'pending' },
     checkoutSessionId: { type: String, default: null },

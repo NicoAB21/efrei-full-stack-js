@@ -4,6 +4,7 @@ import { Types } from 'mongoose'
 import request from 'supertest'
 import { createApp } from '../src/app.js'
 import { paymentsConfig } from '../src/config.js'
+import { Listing } from '../src/models/listing.js'
 import { as, fakeGateway, paid, publish, register, sendWebhook, type Account } from './payments-helpers.js'
 
 const app = createApp()
@@ -116,10 +117,19 @@ describe('US4 : mes achats et mes ventes', () => {
     const res = await request(app).get('/api/purchases').set(as(buyer))
     expect(res.status).toBe(200)
     expect(res.body.items).toEqual([
-      { id: expect.any(String), listingId: lamp, listingTitle: 'Lampe', priceCents: 1500, status: 'confirmed', createdAt: expect.any(String), confirmedAt: expect.any(String) },
-      { id: expect.any(String), listingId, listingTitle: 'Vélo de ville', priceCents: 8500, status: 'pending', createdAt: expect.any(String), confirmedAt: null },
+      { id: expect.any(String), listingId: lamp, listingTitle: 'Lampe', listingPhotoUrl: null, priceCents: 1500, status: 'confirmed', createdAt: expect.any(String), confirmedAt: expect.any(String) },
+      { id: expect.any(String), listingId, listingTitle: 'Vélo de ville', listingPhotoUrl: null, priceCents: 8500, status: 'pending', createdAt: expect.any(String), confirmedAt: null },
     ])
     expect(JSON.stringify(res.body)).not.toMatch(/buyerId|cs_test|pi_|checkout|email/)
+  })
+
+  test('photo principale figée au lancement : reste affichée même si le vendeur change ses photos', async () => {
+    const cover = { id: 'p1', url: '/uploads/p1-1600.webp', cardUrl: '/uploads/p1-480.webp', width: 10, height: 10 }
+    await Listing.updateOne({ _id: listingId }, { photos: [cover] })
+    await buy(buyer, { listingId })
+    await Listing.updateOne({ _id: listingId }, { photos: [] })
+    const [item] = (await request(app).get('/api/purchases').set(as(buyer))).body.items
+    expect(item.listingPhotoUrl).toBe('/uploads/p1-480.webp')
   })
 
   test('isolation : C ne voit pas les achats de B', async () => {

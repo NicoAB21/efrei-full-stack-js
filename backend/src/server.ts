@@ -17,7 +17,7 @@ if (!MONGODB_URI || !JWT_SECRET) {
 }
 
 try {
-  console.log(paymentsConfig() ? 'Paiement de démonstration activé (Stripe, mode test)' : 'Paiement de démonstration désactivé (pas de STRIPE_SECRET_KEY)')
+  console.log(paymentsConfig() ? 'Paiement Stripe activé (mode test)' : 'Paiement Stripe désactivé (pas de STRIPE_SECRET_KEY)')
 } catch (err) {
   console.error((err as Error).message)
   process.exit(1)

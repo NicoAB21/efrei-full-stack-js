@@ -571,6 +571,7 @@ components:
         id: { type: string }
         listingId: { type: string }
         listingTitle: { type: string, description: Titre au moment de l'achat }
+        listingPhotoUrl: { type: string, nullable: true, description: Vignette de la photo principale au moment de l'achat }
         priceCents: { type: integer, description: Prix figé au clic sur « Acheter » }
         status: { type: string, enum: [pending, confirmed, refunded, expired] }
         createdAt: { type: string, format: date-time }

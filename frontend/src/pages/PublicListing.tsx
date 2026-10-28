@@ -6,7 +6,6 @@ import { Alert } from '../components/Alert'
 import { BackLink } from '../components/BackLink'
 import { Button } from '../components/Button'
 import { ContactSeller } from '../components/ContactSeller'
-import { DemoBanner } from '../components/DemoBanner'
 import { Gallery } from '../components/Gallery'
 import { ListingCard } from '../components/ListingCard'
 import { PriceTag } from '../components/PriceTag'
@@ -173,7 +172,7 @@ function Detail({ id }: { id: string }) {
                     {user ? (
                       <Button variant="primary" className="btn-block" loading={buying} onClick={buy}>
                         <ShoppingBag size={18} aria-hidden />
-                        Acheter (démo)
+                        Acheter
                       </Button>
                     ) : (
                       <Link to="/login" className="btn btn-primary btn-block">
@@ -184,7 +183,11 @@ function Detail({ id }: { id: string }) {
                   </>
                 )}
                 <ContactSeller listingId={listing.id} primary={!buyable} connected={Boolean(user)} open={contactOpen} onOpenChange={setContactOpen} />
-                {buyable ? <DemoBanner /> : <p className="muted small">Cet article se règle directement avec le vendeur.</p>}
+                {buyable ? (
+                  <p className="muted small row" style={{ gap: 6 }}><ShieldCheck size={16} aria-hidden /> Paiement sécurisé par carte bancaire</p>
+                ) : (
+                  <p className="muted small">Cet article se règle directement avec le vendeur.</p>
+                )}
               </div>
             )}
           </div>
