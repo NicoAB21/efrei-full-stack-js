@@ -123,7 +123,7 @@ npm run dev            # http://localhost:5173, proxy /api → :3000
 | `backend/`  | `npm test`      | Jest + Supertest            |
 | `backend/`  | `npm run data:communes` | retélécharge le référentiel des communes (`data/communes.json`, une fois par an) |
 | `backend/`  | `npm run migrate:communes` | rattache les anciennes annonces à une commune (une fois, relançable) |
-| `backend/`  | `npm run seed` | données de démo : 5 comptes `alice`, `bruno`, `chloe`, `david`, `emma` `@occaz.test` (mot de passe `motdepasse`) et 23 annonces ; relançable, ne touche qu'aux comptes `@occaz.test`. Docker : `docker compose exec backend npm run seed` |
+| `backend/`  | `npm run seed` | données de démo : 5 comptes `alice`, `bruno`, `chloe`, `david`, `emma` `@occaz.test` (mot de passe `motdepasse`) et 23 annonces avec 29 photos (Wikimedia Commons, licences libres, crédits dans `backend/seed/photos/CREDITS.md`) ; relançable, ne touche qu'aux comptes `@occaz.test`. Docker : `docker compose exec backend npm run seed` |
 | `frontend/` | `npm run dev`   | serveur Vite                |
 | `frontend/` | `npm run lint`  | ESLint                      |
 | `frontend/` | `npm run build` | build de production         |
