@@ -93,6 +93,7 @@ docker compose up --build
 | API               | http://localhost:3000/api/health |
 | Doc API (Swagger) | http://localhost:3000/api/docs   |
 | MongoDB           | mongodb://localhost:27017        |
+| Relais Stripe     | service `stripe` (webhooks → API), actif seulement si `STRIPE_SECRET_KEY` est défini |
 
 Le code est monté dans les conteneurs : le rechargement à chaud fonctionne. Après un
 `npm install <paquet>`, relancer avec `docker compose up --build -V` (recrée les `node_modules`).
@@ -143,12 +144,14 @@ npm run dev            # http://localhost:5173, proxy /api → :3000
 Aucun vrai argent ne circule : Stripe en **mode test** uniquement, le vendeur ne reçoit rien. Sans
 `STRIPE_SECRET_KEY`, le site fonctionne normalement et le bouton « Acheter » n'apparaît pas.
 
-1. Mettre `STRIPE_SECRET_KEY=sk_test_…` et `FRONT_URL=http://localhost:5173` dans `backend/.env`.
-2. Relayer les webhooks vers l'API locale (Stripe CLI), dans un terminal à part :
+1. Mettre dans `backend/.env` : `STRIPE_SECRET_KEY=sk_test_…`, `FRONT_URL=http://localhost:5173` et
+   `STRIPE_WEBHOOK_SECRET=whsec_…`. Pour obtenir ce dernier (une seule fois, il ne change pas pour un compte) :
    ```bash
-   stripe listen --events checkout.session.completed,checkout.session.expired --forward-to localhost:3000/api/stripe/webhook
+   docker compose run --rm --no-deps stripe 'STRIPE_API_KEY=$STRIPE_SECRET_KEY stripe listen --print-secret'
    ```
-   Copier le `whsec_…` affiché dans `STRIPE_WEBHOOK_SECRET`, puis relancer l'API.
+2. `docker compose up` : le service `stripe` relaie lui-même les confirmations de Stripe vers l'API
+   (`docker compose logs -f stripe` pour les voir passer). Sans Docker : même commande `stripe listen` avec
+   `--events checkout.session.completed,checkout.session.expired --forward-to localhost:3000/api/stripe/webhook`.
 3. Cartes de test : `4242 4242 4242 4242` (acceptée), `4000 0000 0000 0002` (refusée), date future, CVC quelconque.
 
 Les tests automatiques n'appellent jamais Stripe (passerelle simulée, webhooks signés localement).

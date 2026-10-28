@@ -8,11 +8,9 @@ Contrat : [contracts/purchases.openapi.yaml](./contracts/purchases.openapi.yaml)
 1. Compte Stripe (gratuit), **mode test** activé.
 2. Clé secrète de test (`sk_test_…`) dans `backend/.env` : `STRIPE_SECRET_KEY=sk_test_…`
    et `FRONT_URL=http://localhost:5173`. Jamais dans git (`.env` est ignoré).
-3. Stripe CLI : `stripe login`, puis dans un terminal à part :
-   ```bash
-   stripe listen --events checkout.session.completed,checkout.session.expired --forward-to localhost:3000/api/stripe/webhook
-   ```
-   Copier le `whsec_…` affiché dans `STRIPE_WEBHOOK_SECRET`, puis relancer l'API.
+3. `STRIPE_WEBHOOK_SECRET=whsec_…` dans `backend/.env` (obtenu une fois avec
+   `docker compose run --rm --no-deps stripe 'STRIPE_API_KEY=$STRIPE_SECRET_KEY stripe listen --print-secret'`).
+   Avec `docker compose up`, le service `stripe` relaie les webhooks vers l'API : aucun terminal en plus.
 4. Sans ces variables, le site fonctionne mais le bouton « Acheter » n'apparaît pas.
 
 ## Automatique (sans réseau ni compte Stripe)

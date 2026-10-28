@@ -36,5 +36,22 @@ services:
     depends_on:
       - backend
 
+  # Relais des webhooks Stripe (paiement de démonstration, spec 005) : remplace `stripe listen` dans un terminal.
+  # Lit STRIPE_SECRET_KEY dans backend/.env ; sans clé, il s'arrête aussitôt et le reste du site fonctionne.
+  stripe:
+    image: stripe/stripe-cli:v1.55.3
+    env_file:
+      - path: ./backend/.env
+        required: false
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        if [ -z "$$STRIPE_SECRET_KEY" ]; then echo "Pas de STRIPE_SECRET_KEY : relais Stripe désactivé"; exit 0; fi
+        export STRIPE_API_KEY="$$STRIPE_SECRET_KEY"
+        exec stripe listen --events checkout.session.completed,checkout.session.expired --forward-to backend:3000/api/stripe/webhook
+    restart: on-failure
+    depends_on:
+      - backend
+
 volumes:
   mongo-data:
