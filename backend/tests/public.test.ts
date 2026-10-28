@@ -35,6 +35,16 @@ test('filtres cumulés, prix inclusifs et recherche dans la description', async 
   expect(res.body.items.map((item: { id: string }) => item.id)).toEqual([match.id])
 })
 
+test('ownerId : seulement les annonces disponibles de ce vendeur ; mal formé → 400', async () => {
+  const seller = new Types.ObjectId()
+  const mine = await create({ ownerId: seller })
+  await create({ ownerId: seller, status: 'sold' })
+  await create()
+  const res = await request(app).get('/api/public/listings').query({ ownerId: String(seller) }).expect(200)
+  expect(res.body.items.map((item: { id: string }) => item.id)).toEqual([mine.id])
+  await request(app).get('/api/public/listings').query({ ownerId: 'abc' }).expect(400)
+})
+
 // Les annonces créées directement en base ci-dessus n'ont pas de cityCode : ce sont des « anciennes » annonces
 // en texte libre, retrouvées par le repli sur le texte de la ville.
 test('mot-clé et ville traitent les caractères regex comme du texte', async () => {

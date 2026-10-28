@@ -160,6 +160,7 @@ paths:
         - { name: q, in: query, description: Mot-clé (titre ou description), schema: { type: string, maxLength: 100 } }
         - { name: minPrice, in: query, description: En centimes, schema: { type: integer, minimum: 1 } }
         - { name: maxPrice, in: query, description: En centimes, schema: { type: integer, minimum: 1 } }
+        - { name: ownerId, in: query, description: Annonces d'un même vendeur (page produit), schema: { type: string, pattern: '^[a-fA-F0-9]{24}$' } }
       responses:
         '200':
           description: OK (uniquement status = available)

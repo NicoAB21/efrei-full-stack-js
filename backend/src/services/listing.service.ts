@@ -65,6 +65,7 @@ export async function listPublic(filters: PublicQuery) {
   const query = Listing.find({ status: 'available' }).select(publicFields)
   if (filters.category) query.where('category').equals(filters.category)
   if (filters.cityCode) query.where('cityCode').equals(filters.cityCode)
+  if (filters.ownerId) query.where('ownerId').equals(filters.ownerId)
   // Nom de commune : toutes ses annonces (tous codes postaux) ; repli sur le texte des anciennes annonces
   if (filters.city) query.and([{ $or: [{ cityKey: normalize(filters.city) }, { cityCode: null, city: literalPattern(filters.city) }] }])
   if (filters.q) {
