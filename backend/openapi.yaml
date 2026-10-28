@@ -255,6 +255,78 @@ paths:
         '400': { $ref: '#/components/responses/InvalidInput' }
         '401': { $ref: '#/components/responses/Unauthorized' }
 
+  /api/listings/{id}/photos:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    post:
+      tags: [listings]
+      summary: Ajouter 1 à 5 photos à MON annonce (5 au total maximum)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [photos]
+              properties:
+                photos:
+                  type: array
+                  minItems: 1
+                  maxItems: 5
+                  items: { type: string, format: binary }
+                  description: JPEG, PNG ou WebP (vérifié sur le contenu), 5 Mo maximum chacune
+      responses:
+        '201':
+          description: Annonce avec ses photos
+          content: { application/json: { schema: { $ref: '#/components/schemas/Listing' } } }
+        '400':
+          description: Format refusé (SVG, GIF, PDF, faux JPEG…), plus de 5 Mo, plus de 5 photos, aucune photo
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [listings]
+      summary: Réordonner les photos de MON annonce (la première devient principale)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [order]
+              properties:
+                order:
+                  type: array
+                  maxItems: 5
+                  items: { type: string, format: uuid }
+                  description: Permutation exacte des ids de photos existants
+      responses:
+        '200':
+          description: Annonce avec ses photos réordonnées
+          content: { application/json: { schema: { $ref: '#/components/schemas/Listing' } } }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/listings/{id}/photos/{photoId}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+      - name: photoId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    delete:
+      tags: [listings]
+      summary: Supprimer une photo de MON annonce
+      responses:
+        '200':
+          description: Annonce sans cette photo (la suivante devient principale si besoin)
+          content: { application/json: { schema: { $ref: '#/components/schemas/Listing' } } }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
 security:
   - bearerAuth: []
 
@@ -336,6 +408,11 @@ components:
         status: { $ref: '#/components/schemas/Status' }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
+        photos:
+          type: array
+          maxItems: 5
+          description: 0 à 5 photos, la première est la photo principale (spec 003)
+          items: { $ref: '#/components/schemas/Photo' }
 
     ListingList:
       type: object
@@ -352,6 +429,16 @@ components:
           required: [favoritedAt]
           properties:
             favoritedAt: { type: string, format: date-time }
+
+    Photo:
+      type: object
+      required: [id, url, cardUrl, width, height]
+      properties:
+        id: { type: string, format: uuid }
+        url: { type: string, example: /uploads/6f1c2e3a-…-1600.webp }
+        cardUrl: { type: string, example: /uploads/6f1c2e3a-…-480.webp }
+        width: { type: integer }
+        height: { type: integer }
 
     Error:
       type: object

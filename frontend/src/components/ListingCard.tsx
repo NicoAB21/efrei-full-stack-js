@@ -1,11 +1,11 @@
 import { Heart } from 'lucide-react'
 import { Link } from 'react-router'
-import type { Listing } from '../constants'
+import type { Listing, Photo } from '../constants'
 import { CategoryIcon } from './CategoryIcon'
 import { PriceTag } from './PriceTag'
 
 type Props = {
-  listing: Pick<Listing, 'title' | 'priceCents' | 'category' | 'city' | 'status' | 'createdAt'>
+  listing: Pick<Listing, 'title' | 'priceCents' | 'category' | 'city' | 'status' | 'createdAt'> & { photos?: Photo[] }
   /** Lien vers le détail : toute la carte devient cliquable ; absent = carte non cliquable (ex. favori vendu) */
   to?: string
   /** Bouton cœur affiché seulement si onToggleFavorite est fourni (favoris : pas encore dans le modèle) */
@@ -15,15 +15,20 @@ type Props = {
 
 const date = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short' })
 
-/** Carte d'annonce : prix en étiquette en haut à gauche, tampon « Vendu » si vendue. */
+/** Carte d'annonce : photo principale (ou pictogramme), prix en étiquette, tampon « Vendu » si vendue. */
 export function ListingCard({ listing, to, favorite = false, onToggleFavorite }: Props) {
   const sold = listing.status === 'sold'
+  const cover = listing.photos?.[0] // photo principale, sinon pictogramme de la catégorie
   return (
     <article className={`listing-card ${sold ? 'is-sold' : ''}`}>
-      <div className="media">
+      <div className={`media ${cover ? 'has-photo' : ''}`}>
         <PriceTag cents={listing.priceCents} sold={sold} />
         {sold && <span className="stamp">Vendu</span>}
-        <CategoryIcon category={listing.category} size={48} strokeWidth={1.5} />
+        {cover ? (
+          <img src={cover.cardUrl} alt="" loading="lazy" width={cover.width} height={cover.height} />
+        ) : (
+          <CategoryIcon category={listing.category} size={48} strokeWidth={1.5} />
+        )}
       </div>
       {onToggleFavorite && (
         <button

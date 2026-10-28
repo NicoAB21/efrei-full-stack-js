@@ -4,6 +4,7 @@ import { useParams } from 'react-router'
 import { apiFetch } from '../api'
 import { Alert } from '../components/Alert'
 import { BackLink } from '../components/BackLink'
+import { Gallery } from '../components/Gallery'
 import { PriceTag } from '../components/PriceTag'
 import { StatusBadge } from '../components/StatusBadge'
 import { useAuth } from '../auth'
@@ -45,6 +46,7 @@ function Detail({ id }: { id: string }) {
         <p role="status" className="muted">Chargement de l’annonce…</p>
       ) : (
         <article className="panel">
+          <Gallery photos={listing.photos ?? []} title={listing.title} />
           <StatusBadge status={listing.status} />
           <h1>{listing.title}</h1>
           <PriceTag cents={listing.priceCents} size="lg" />

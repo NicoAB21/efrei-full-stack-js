@@ -13,6 +13,7 @@ Projet du module EFREI « Full Stack JS » (M1, octobre 2026), réalisé par Nic
 | US3 | **Isolation** : un vendeur ne peut ni voir, ni modifier, ni supprimer les annonces d'un autre (404) | serveur |
 | US4 | **Vitrine** : annonces disponibles de tous les vendeurs, recherche (mot-clé, ville), catégories, fourchette de prix, détail sans donnée privée | public |
 | + | **Favoris** liés au compte : cœur sur les cartes et le détail, page « Favoris », reprise des favoris du navigateur à la connexion (spec 002) | connecté (navigateur pour un visiteur) |
+| + | **Photos** : 0 à 5 par annonce (JPEG, PNG, WebP vérifiés, métadonnées GPS retirées), photo principale sur les cartes, galerie sur le détail (spec 003) | propriétaire / public |
 | + | Sélections « Petits prix » et « Près de chez vous » | public |
 
 Pages : `/` (annonces), `/annonces/:id` (détail public), `/favoris`, `/login`, `/register`, `/listings` (mes annonces), `/listings/new`, `/listings/:id`, `/listings/:id/edit`, `/design` (design system).
@@ -63,6 +64,7 @@ backend/   Express 5 + TypeScript : routes → contrôleurs → services → mod
 | `isolation.test.ts` | B ne peut rien faire sur l'annonce de A (404 identique à un id inexistant) |
 | `public.test.ts` | vitrine : jamais d'annonce vendue, filtres, aucune donnée privée |
 | `favorites.test.ts` | favoris : idempotence, 200 maximum, vendue gardée, supprimée retirée, import, isolation A/B |
+| `photos.test.ts` | photos : formats refusés (SVG, faux JPEG…), 5 Mo, 5 photos, GPS retiré, tout ou rien, ordre, suppression des fichiers, isolation A/B |
 | `openapi.test.ts` | chaque route décrite dans Swagger existe vraiment |
 
 Côté front, `npm test` (`node --test`, sans dépendance) vérifie la conversion des prix et `api.ts` : envoi du token, erreurs de connexion, retour à la connexion quand la session expire.
@@ -170,12 +172,12 @@ Bonus spécifiés avec spec-kit (spec, plan et tâches dans `specs/`) :
 | Spec | Bonus | Priorité |
 |---|---|---|
 | [`002-favoris`](specs/002-favoris/spec.md) | Favoris liés au compte, page « Favoris », reprise des favoris du navigateur | ✅ fait |
-| [`003-photos-annonces`](specs/003-photos-annonces/spec.md) | 0 à 5 photos par annonce, formats vérifiés, métadonnées retirées | 2 |
+| [`003-photos-annonces`](specs/003-photos-annonces/spec.md) | 0 à 5 photos par annonce, formats vérifiés, métadonnées retirées | ✅ fait |
 | [`004-communes-fiables`](specs/004-communes-fiables/spec.md) | Communes officielles avec code postal, validées côté serveur | 3 |
 | [`005-paiement-demo`](specs/005-paiement-demo/spec.md) | Paiement Stripe **de démonstration** (mode test), une seule vente par annonce | optionnel, en dernier |
 
 
-- **Photos d'annonces** : pas encore d'upload (les cartes affichent le pictogramme de la catégorie). Évolution prévue : `multer`, JPEG/PNG/WebP vérifiés, 5 Mo max.
+- **Photos** stockées sur le disque du serveur (`UPLOADS_DIR`, défaut `backend/uploads/`, ignoré par git) : en production, il faudrait un volume persistant ou un stockage objet.
 - **Ville** en texte libre ; évolution possible : communes officielles via `geo.api.gouv.fr`.
 - **Messagerie** acheteur → vendeur (US5) spécifiée mais pas encore réalisée.
 - **Paiement** volontairement hors périmètre (la spec l'exclut) : un vrai paiement entre particuliers demanderait Stripe Connect.

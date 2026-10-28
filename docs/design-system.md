@@ -29,6 +29,8 @@ Le style du front Occaz : blanc cassé, bleu nuit et orange, avec une seule sign
 
 ## Écarté pour le MVP
 
-Badges « Nouveau » et « Prix en baisse » (pas de données pour les alimenter), photos d'annonces (bonus « upload d'images »), barre de recherche dans l'en-tête (la recherche est dans le hero de l'accueil), mode sombre (l'orange tombe à 3,45:1 sur fond sombre).
+Badges « Nouveau » et « Prix en baisse » (pas de données pour les alimenter), barre de recherche dans l'en-tête (la recherche est dans le hero de l'accueil), mode sombre (l'orange tombe à 3,45:1 sur fond sombre).
 
 Les **favoris** (spec 002) : cœur `.fav-btn` sur les cartes, bouton « Ajouter aux favoris » sur le détail, page « Favoris », message flottant `.toast` (invitation à se connecter, erreur).
+
+Les **photos** (spec 003) : photo principale recadrée dans le carré des cartes (`.media.has-photo`), galerie `.gallery` sur les détails (grande photo + vignettes, flèches du clavier), gestion `.photo-grid` / `.photo-tile` dans les formulaires.

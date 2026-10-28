@@ -18,6 +18,8 @@ export const STATUSES = {
 export type Category = keyof typeof CATEGORIES
 export type Status = keyof typeof STATUSES
 
+export type Photo = { id: string; url: string; cardUrl: string; width: number; height: number }
+
 export type Listing = {
   id: string
   ownerId: string
@@ -29,4 +31,6 @@ export type Listing = {
   status: Status
   createdAt: string
   updatedAt: string
+  /** 0 à 5 photos, la première est la photo principale (spec 003) */
+  photos: Photo[]
 }

@@ -16,6 +16,16 @@ export const updateListing = (id: string, data: Partial<ListingInput>) =>
 
 export const deleteListing = (id: string) => apiFetch<void>(`/listings/${id}`, { method: 'DELETE' })
 
+export function uploadPhotos(id: string, files: File[]) {
+  const body = new FormData()
+  for (const file of files) body.append('photos', file)
+  return apiFetch<Listing>(`/listings/${id}/photos`, { method: 'POST', body })
+}
+
+export const reorderPhotos = (id: string, order: string[]) => apiFetch<Listing>(`/listings/${id}/photos`, json('PATCH', { order }))
+
+export const deletePhoto = (id: string, photoId: string) => apiFetch<Listing>(`/listings/${id}/photos/${photoId}`, { method: 'DELETE' })
+
 export const errorMessage = (error: unknown) =>
   error instanceof Error ? error.message : 'Une erreur inattendue est survenue. Réessayez.'
 

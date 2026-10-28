@@ -14,7 +14,7 @@ test('liste publique : tous les vendeurs, disponibles seulement, ordre et aucune
   const res = await request(app).get('/api/public/listings').expect(200)
   expect(res.body.items.map((item: { id: string }) => item.id)).toEqual([newer.id, older.id])
   for (const item of res.body.items) {
-    expect(Object.keys(item).sort()).toEqual(['id', 'ownerId', 'title', 'description', 'priceCents', 'category', 'city', 'status', 'createdAt', 'updatedAt'].sort())
+    expect(Object.keys(item).sort()).toEqual(['id', 'ownerId', 'title', 'description', 'priceCents', 'category', 'city', 'status', 'createdAt', 'updatedAt', 'photos'].sort())
   }
 })
 

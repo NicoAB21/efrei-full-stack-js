@@ -15,6 +15,7 @@ services:
       PORT: 3000
       MONGODB_URI: mongodb://mongo:27017/occaz
       JWT_SECRET: change-me-dev-only
+      UPLOADS_DIR: /app/uploads
       CHOKIDAR_USEPOLLING: "true"
     volumes:
       - ./backend:/app

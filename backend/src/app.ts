@@ -8,6 +8,7 @@ import { listingsRouter } from './routes/listings.js'
 import { authRouter } from './routes/auth.js'
 import { publicRouter } from './routes/public.js'
 import { favoritesRouter } from './routes/favorites.js'
+import { uploadsDir } from './photos/storage.js'
 
 const openapi = parse(readFileSync(new URL('../openapi.yaml', import.meta.url), 'utf8'))
 z.config(z.locales.fr())
@@ -29,6 +30,16 @@ export function createApp() {
   app.use('/api/auth', authRouter)
   app.use('/api/public/listings', publicRouter)
   app.use('/api/favorites', favoritesRouter)
+
+  // Photos d'annonces : fichiers statiques, sans liste du dossier, jamais interprétés autrement qu'en image
+  app.use(
+    '/uploads',
+    express.static(uploadsDir(), {
+      index: false,
+      maxAge: '30d',
+      setHeaders: (res) => res.setHeader('X-Content-Type-Options', 'nosniff'),
+    }),
+  )
 
   app.use('/api', () => {
     throw notFound('Route inconnue')

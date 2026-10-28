@@ -1,11 +1,13 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { Alert } from '../components/Alert'
 import { BackLink } from '../components/BackLink'
 import { Button } from '../components/Button'
 import { Field } from '../components/Field'
+import { PhotoManager } from '../components/PhotoManager'
+import { PhotoPicker } from '../components/PhotoPicker'
 import { CATEGORIES, STATUSES, type Category, type Listing, type Status } from '../constants'
-import { createListing, errorMessage, fetchListing, loadErrorMessage, updateListing, type ListingInput } from '../listings'
+import { createListing, errorMessage, fetchListing, loadErrorMessage, updateListing, uploadPhotos, type ListingInput } from '../listings'
 import { parsePrice, toPriceInput } from '../price'
 
 type FieldName = 'title' | 'description' | 'price' | 'category' | 'city' | 'status'
@@ -53,9 +55,11 @@ type FormProps = {
   editing: boolean
   cancelTo: string
   onSubmit: (input: ListingInput) => Promise<void>
+  /** Photos à envoyer avec une nouvelle annonce (spec 003) */
+  photos?: { files: File[]; onChange: (files: File[]) => void }
 }
 
-function ListingForm({ initial, editing, cancelTo, onSubmit }: FormProps) {
+function ListingForm({ initial, editing, cancelTo, onSubmit, photos }: FormProps) {
   const [values, setValues] = useState(initial)
   const [errors, setErrors] = useState<Errors>({})
   const [serverError, setServerError] = useState<string | null>(null)
@@ -118,6 +122,7 @@ function ListingForm({ initial, editing, cancelTo, onSubmit }: FormProps) {
           ))}
         </Field>
       )}
+      {photos && <PhotoPicker files={photos.files} onChange={photos.onChange} />}
       <div className="row">
         <Button type="submit" loading={saving}>
           {editing ? 'Enregistrer les modifications' : "Publier l'annonce"}
@@ -142,15 +147,27 @@ function FormLayout({ title, backTo, backLabel, children }: { title: string; bac
 
 export function NewListingPage() {
   const navigate = useNavigate()
+  const [files, setFiles] = useState<File[]>([])
 
   async function publish(input: ListingInput) {
     const created = await createListing(input)
+    if (files.length > 0) {
+      try {
+        await uploadPhotos(created.id, files)
+      } catch (err) {
+        // L'annonce existe : on ouvre sa modification pour réessayer l'envoi des photos
+        navigate(`/listings/${created.id}/edit`, {
+          state: { error: `Annonce publiée, mais les photos n'ont pas pu être envoyées : ${errorMessage(err)}` },
+        })
+        return
+      }
+    }
     navigate(`/listings/${created.id}`, { state: { message: 'Annonce publiée. Elle apparaît dans « Mes annonces ».' } })
   }
 
   return (
     <FormLayout title="Publier une annonce" backTo="/listings" backLabel="Mes annonces">
-      <ListingForm initial={EMPTY} editing={false} cancelTo="/listings" onSubmit={publish} />
+      <ListingForm initial={EMPTY} editing={false} cancelTo="/listings" onSubmit={publish} photos={{ files, onChange: setFiles }} />
     </FormLayout>
   )
 }
@@ -158,6 +175,7 @@ export function NewListingPage() {
 export function EditListingPage() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
+  const flashError = (useLocation().state as { error?: string } | null)?.error
   const [listing, setListing] = useState<Listing | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -196,7 +214,11 @@ export function EditListingPage() {
           Chargement de l'annonce…
         </p>
       ) : (
-        <ListingForm key={listing.id} initial={fromListing(listing)} editing cancelTo={`/listings/${listing.id}`} onSubmit={save} />
+        <>
+          {flashError && <Alert type="error">{flashError}</Alert>}
+          <ListingForm key={listing.id} initial={fromListing(listing)} editing cancelTo={`/listings/${listing.id}`} onSubmit={save} />
+          <PhotoManager listing={listing} onChange={setListing} />
+        </>
       )}
     </FormLayout>
   )

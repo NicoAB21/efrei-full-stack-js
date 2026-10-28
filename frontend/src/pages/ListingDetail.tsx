@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { Alert } from '../components/Alert'
 import { BackLink } from '../components/BackLink'
 import { Button } from '../components/Button'
+import { Gallery } from '../components/Gallery'
 import { PriceTag } from '../components/PriceTag'
 import { StatusBadge } from '../components/StatusBadge'
 import { CATEGORIES, type Listing } from '../constants'
@@ -96,6 +97,7 @@ export function ListingDetail() {
           <StatusBadge status={listing.status} />
           <span className="muted small">Publiée le {longDate.format(new Date(listing.createdAt))}</span>
         </div>
+        <Gallery photos={listing.photos ?? []} title={listing.title} />
         <h1>{listing.title}</h1>
         <div style={{ ['--hole-bg' as string]: 'var(--surface)' }}>
           <PriceTag cents={listing.priceCents} size="lg" sold={sold} />

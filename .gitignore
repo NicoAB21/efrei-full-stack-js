@@ -19,3 +19,6 @@ Thumbs.db
 
 # Réglages Claude Code propres à chaque poste (les skills de .claude/ restent versionnés)
 .claude/settings.local.json
+
+# Photos envoyées par les utilisateurs (spec 003)
+backend/uploads/

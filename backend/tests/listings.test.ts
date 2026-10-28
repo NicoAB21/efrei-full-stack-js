@@ -46,6 +46,7 @@ describe('CRUD nominal', () => {
       id: expect.any(String),
       ownerId: userId,
       status: 'available',
+      photos: [], // spec 003 : sans photo → tableau vide
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
     })
