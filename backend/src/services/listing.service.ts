@@ -5,6 +5,8 @@ import { deletePhotoFiles } from '../photos/storage.js'
 import { Listing } from '../models/listing.js'
 import type { ListingCreateInput, ListingUpdateInput } from '../schemas/listing.js'
 import type { PublicQuery } from '../schemas/listing.js'
+import { paymentsConfig } from '../config.js'
+import { MAX_BUYABLE_CENTS, NOT_BUYABLE_CATEGORIES } from '../schemas/purchase.js'
 
 const notFoundListing = () => notFound('Annonce introuvable')
 
@@ -61,6 +63,14 @@ const literalPattern = (value: string) => new RegExp(value.replace(/[.*+?^${}()|
 // Projection explicite : aucune jointure avec les données du vendeur.
 const publicFields = 'title description priceCents category city cityCode postalCode status createdAt updatedAt ownerId photos'
 
+export const PAGE_SIZE = 50
+const SORTS = {
+  recent: { createdAt: -1, _id: -1 },
+  price_asc: { priceCents: 1, _id: -1 },
+  price_desc: { priceCents: -1, _id: -1 },
+} as const
+
+/** Vitrine : une page de résultats + le nombre total d'annonces qui correspondent. */
 export async function listPublic(filters: PublicQuery) {
   const query = Listing.find({ status: 'available' }).select(publicFields)
   if (filters.category) query.where('category').equals(filters.category)
@@ -74,7 +84,18 @@ export async function listPublic(filters: PublicQuery) {
   }
   if (filters.minPrice !== undefined) query.where('priceCents').gte(filters.minPrice)
   if (filters.maxPrice !== undefined) query.where('priceCents').lte(filters.maxPrice)
-  return query.sort({ createdAt: -1, _id: -1 }).limit(50)
+  if (filters.photos) query.where('photos.0').exists(true)
+  if (filters.buyable) {
+    // Mêmes règles que le bouton « Acheter » ; aucun résultat si le paiement est désactivé
+    if (paymentsConfig()) query.where('category').nin([...NOT_BUYABLE_CATEGORIES]).where('priceCents').lte(MAX_BUYABLE_CENTS)
+    else query.where('_id').equals(null)
+  }
+  const page = filters.page ?? 1
+  const [items, total] = await Promise.all([
+    query.clone().sort(SORTS[filters.sort ?? 'recent']).skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE),
+    query.clone().countDocuments(),
+  ])
+  return { items, total }
 }
 
 export async function getPublic(id: string) {

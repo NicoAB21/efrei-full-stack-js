@@ -1,5 +1,6 @@
 import { Heart, LayoutGrid, LogIn, Plus, Tag } from 'lucide-react'
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router'
+import { HeaderSearch } from './components/HeaderSearch'
 import { Logo } from './components/Logo'
 import { DesignPage } from './pages/DesignPage'
 import { ListingDetail } from './pages/ListingDetail'
@@ -15,7 +16,8 @@ import { Favorites } from './pages/Favorites'
 import { Home } from './pages/Home'
 import { PublicListing } from './pages/PublicListing'
 import { Purchases } from './pages/Purchases'
-import { PaymentResult } from './pages/PaymentResult'
+import { PaymentResult, PaymentReturn } from './pages/PaymentResult'
+import { Search } from './pages/Search'
 
 // Page provisoire : chaque story remplace la sienne par la vraie page.
 function Todo({ title, task }: { title: string; task: string }) {
@@ -48,6 +50,7 @@ function AppContent() {
       <header className="site-header">
         <div className="wrap">
           <Logo />
+          <HeaderSearch />
           <nav aria-label="Navigation principale">
             <NavLink to="/" end className={navClass}>
               <LayoutGrid size={20} aria-hidden />
@@ -80,6 +83,7 @@ function AppContent() {
         <div className="wrap">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/recherche" element={<Search />} />
             <Route path="/annonces/:id" element={<PublicListing />} />
             <Route path="/favoris" element={<Favorites />} />
             <Route path="/login" element={<Login />} />
@@ -90,7 +94,8 @@ function AppContent() {
               <Route path="/listings/:id" element={<ListingDetail />} />
               <Route path="/listings/:id/edit" element={<EditListingPage />} />
               <Route path="/achats" element={<Purchases />} />
-              <Route path="/paiement" element={<PaymentResult />} />
+              <Route path="/achats/:id" element={<PaymentResult />} />
+              <Route path="/paiement" element={<PaymentReturn />} />
             </Route>
             <Route path="/design" element={<DesignPage />} />
             <Route path="*" element={<Todo title="Page introuvable" task="—" />} />

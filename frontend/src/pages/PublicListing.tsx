@@ -120,7 +120,7 @@ function Detail({ id }: { id: string }) {
       <nav aria-label="Fil d’Ariane" className="breadcrumb">
         <ol>
           <li><Link to="/">Annonces</Link></li>
-          <li><Link to={`/?category=${listing.category}`}>{CATEGORIES[listing.category]}</Link></li>
+          <li><Link to={`/recherche?category=${listing.category}`}>{CATEGORIES[listing.category]}</Link></li>
           <li aria-current="page">{listing.title}</li>
         </ol>
       </nav>

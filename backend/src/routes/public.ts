@@ -8,7 +8,7 @@ import { getPublic, listPublic } from '../services/listing.service.js'
 export const publicRouter = Router()
 
 publicRouter.get('/', async (req, res) => {
-  res.json({ items: await listPublic(publicQuerySchema.parse(req.query)) })
+  res.json(await listPublic(publicQuerySchema.parse(req.query)))
 })
 
 publicRouter.get('/:id', async (req, res) => {

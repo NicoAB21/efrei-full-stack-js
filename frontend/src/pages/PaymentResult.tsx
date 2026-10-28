@@ -1,21 +1,29 @@
 import { CircleCheck, CircleX, Clock, LoaderCircle, Package, ShoppingBag } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { Link, Navigate, useParams, useSearchParams } from 'react-router'
 import { apiFetch } from '../api'
 import { Alert } from '../components/Alert'
+import { BackLink } from '../components/BackLink'
 import type { Purchase } from '../constants'
 import { errorMessage } from '../listings'
 import { formatPrice } from '../price'
 
-// Retour de Stripe (/paiement?achat=<id>). La vente n'est validée que par le webhook :
-// on relit l'achat jusqu'à ce que Stripe l'ait confirmé (quelques secondes en général).
+// Récapitulatif d'un achat (/achats/:id), ouvert depuis « Mes achats » ou au retour de Stripe (?paiement=1).
+// La vente n'est validée que par le webhook : tant que l'achat est en attente, on le relit (quelques secondes en général).
 const RETRY_MS = 1500
 const MAX_RETRIES = 10
 
 const date = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeStyle: 'short' })
 
-export function PaymentResult() {
+/** Ancienne adresse de retour de Stripe (/paiement?achat=<id>) : redirige vers le récapitulatif. */
+export function PaymentReturn() {
   const id = useSearchParams()[0].get('achat')
+  return <Navigate to={id ? `/achats/${encodeURIComponent(id)}?paiement=1` : '/achats'} replace />
+}
+
+export function PaymentResult() {
+  const { id } = useParams()
+  const justPaid = useSearchParams()[0].has('paiement') // retour de Stripe : ton « merci » plutôt que récapitulatif
   const [purchase, setPurchase] = useState<Purchase | null | undefined>(undefined) // undefined = chargement
   const [error, setError] = useState('')
   const [tries, setTries] = useState(0)
@@ -51,8 +59,8 @@ export function PaymentResult() {
   return (
     <Shell>
       {purchase.status === 'confirmed' && (
-        <Result icon={<CircleCheck size={56} aria-hidden />} tone="ok" title="Paiement confirmé !">
-          Merci pour votre achat. « {purchase.listingTitle} » est à vous.
+        <Result icon={<CircleCheck size={56} aria-hidden />} tone="ok" title={justPaid ? 'Paiement confirmé !' : 'Achat confirmé'}>
+          {justPaid ? <>Merci pour votre achat. « {purchase.listingTitle} » est à vous.</> : <>Payé le {date.format(new Date(purchase.confirmedAt ?? purchase.createdAt))}.</>}
         </Result>
       )}
       {purchase.status === 'pending' && (
@@ -94,7 +102,7 @@ export function PaymentResult() {
         </dl>
       </section>
 
-      {purchase.status === 'confirmed' && (
+      {purchase.status === 'confirmed' && justPaid && (
         <section className="panel" aria-labelledby="next-title">
           <h2 id="next-title" className="h3">Et maintenant ?</h2>
           <ol className="payment-steps">
@@ -111,7 +119,12 @@ export function PaymentResult() {
 }
 
 function Shell({ children }: { children: ReactNode }) {
-  return <div className="stack payment-page">{children}</div>
+  return (
+    <div className="stack payment-page">
+      <BackLink to="/achats">Mes achats</BackLink>
+      {children}
+    </div>
+  )
 }
 
 function Result({ icon, tone, title, children }: { icon: ReactNode; tone: 'ok' | 'wait' | 'error'; title: string; children: ReactNode }) {

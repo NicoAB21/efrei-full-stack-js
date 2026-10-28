@@ -35,6 +35,30 @@ test('filtres cumulés, prix inclusifs et recherche dans la description', async 
   expect(res.body.items.map((item: { id: string }) => item.id)).toEqual([match.id])
 })
 
+test('tri par prix, pagination de 50 et total', async () => {
+  await Listing.insertMany(Array.from({ length: 55 }, (_, i) => ({ ...base, ownerId: new Types.ObjectId(), priceCents: 100 + i })))
+  const asc = await request(app).get('/api/public/listings').query({ sort: 'price_asc' }).expect(200)
+  expect(asc.body.total).toBe(55)
+  expect(asc.body.items[0].priceCents).toBe(100)
+  const desc = await request(app).get('/api/public/listings').query({ sort: 'price_desc', page: '2' }).expect(200)
+  expect(desc.body.items.map((l: { priceCents: number }) => l.priceCents)).toEqual([104, 103, 102, 101, 100])
+  await request(app).get('/api/public/listings').query({ sort: 'prix' }).expect(400)
+  await request(app).get('/api/public/listings').query({ page: '0' }).expect(400)
+})
+
+test('photos=1 et buyable=1 (hors Immobilier / Véhicules, ≤ 10 000 €)', async () => {
+  const photo = { id: 'p', url: '/uploads/p-1600.webp', cardUrl: '/uploads/p-480.webp', width: 1, height: 1 }
+  const withPhoto = await create({ photos: [photo] })
+  const flat = await create({ category: 'immobilier' })
+  const expensive = await create({ priceCents: 1_000_001 })
+  const ids = async (query: object) => (await request(app).get('/api/public/listings').query(query).expect(200)).body.items.map((l: { id: string }) => l.id)
+  expect(await ids({ photos: '1' })).toEqual([withPhoto.id])
+  const buyable = await ids({ buyable: '1' })
+  expect(buyable).toContain(withPhoto.id)
+  expect(buyable).not.toContain(flat.id)
+  expect(buyable).not.toContain(expensive.id)
+})
+
 test('ownerId : seulement les annonces disponibles de ce vendeur ; mal formé → 400', async () => {
   const seller = new Types.ObjectId()
   const mine = await create({ ownerId: seller })
@@ -77,7 +101,7 @@ test('détail public disponible, vendue ou absente → 404, id invalide → 400'
 })
 
 test('recherche sans résultat et routes privées toujours protégées', async () => {
-  await request(app).get('/api/public/listings').expect(200, { items: [] })
+  await request(app).get('/api/public/listings').expect(200, { items: [], total: 0 })
   const id = new Types.ObjectId().toString()
   await request(app).get('/api/listings').expect(401)
   await request(app).post('/api/listings').send(base).expect(401)

@@ -161,12 +161,22 @@ paths:
         - { name: minPrice, in: query, description: En centimes, schema: { type: integer, minimum: 1 } }
         - { name: maxPrice, in: query, description: En centimes, schema: { type: integer, minimum: 1 } }
         - { name: ownerId, in: query, description: Annonces d'un même vendeur (page produit), schema: { type: string, pattern: '^[a-fA-F0-9]{24}$' } }
+        - { name: sort, in: query, description: Tri (défaut recent), schema: { type: string, enum: [recent, price_asc, price_desc] } }
+        - { name: buyable, in: query, description: '1 = achat en ligne possible (hors Immobilier / Véhicules, ≤ 10 000 €)', schema: { type: string, enum: ['1'] } }
+        - { name: photos, in: query, description: '1 = avec au moins une photo', schema: { type: string, enum: ['1'] } }
+        - { name: page, in: query, description: Page de 50 résultats (défaut 1), schema: { type: integer, minimum: 1, maximum: 1000 } }
       responses:
         '200':
-          description: OK (uniquement status = available)
+          description: OK (uniquement status = available) ; `total` = nombre d'annonces correspondantes, toutes pages
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ListingList' }
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ListingList'
+                  - type: object
+                    required: [total]
+                    properties:
+                      total: { type: integer }
         '400': { $ref: '#/components/responses/InvalidInput' }
 
   /api/public/listings/{id}:

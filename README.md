@@ -18,7 +18,7 @@ Projet du module EFREI « Full Stack JS » (M1, octobre 2026), réalisé par Nic
 | + | **Paiement de démonstration** (Stripe, mode test) : « Acheter (démo) », vente validée par webhook signé, une seule vente par annonce (l'autre paiement est remboursé), « Mes achats » (spec 005) | connecté |
 | + | Sélections « Petits prix » et « Près de chez vous » | public |
 
-Pages : `/` (annonces), `/annonces/:id` (détail public), `/favoris`, `/login`, `/register`, `/listings` (mes annonces), `/listings/new`, `/listings/:id`, `/listings/:id/edit`, `/achats` (mes achats), `/design` (design system).
+Pages : `/` (accueil), `/recherche` (résultats et filtres), `/annonces/:id` (détail public), `/favoris`, `/login`, `/register`, `/listings` (mes annonces), `/listings/new`, `/listings/:id`, `/listings/:id/edit`, `/achats` et `/achats/:id` (mes achats, récapitulatif), `/design` (design system).
 
 ## Architecture
 

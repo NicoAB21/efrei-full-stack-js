@@ -39,7 +39,8 @@ export function Purchases() {
       ) : (
         <ul className="purchase-list">
           {items.map((p) => (
-            <li key={p.id} className="panel payment-item">
+            <li key={p.id}>
+              <Link to={`/achats/${p.id}`} className="panel payment-item purchase-link" aria-label={`${p.listingTitle}, ${formatPrice(p.priceCents)}, ${PURCHASE_STATUSES[p.status]}`}>
               {p.listingPhotoUrl ? (
                 <img src={p.listingPhotoUrl} alt="" width={72} height={72} loading="lazy" />
               ) : (
@@ -53,6 +54,7 @@ export function Purchases() {
                 <b>{formatPrice(p.priceCents)}</b>
                 <span className={`badge ${p.status === 'confirmed' ? 'badge-available' : 'badge-sold'}`}>{PURCHASE_STATUSES[p.status]}</span>
               </div>
+              </Link>
             </li>
           ))}
         </ul>
