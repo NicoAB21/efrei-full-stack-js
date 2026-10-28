@@ -1,4 +1,4 @@
-import { Heart, LayoutGrid, LogIn, Plus, Tag } from 'lucide-react'
+import { Heart, LayoutGrid, LogIn, MessageCircle, Plus, Tag } from 'lucide-react'
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router'
 import { HeaderSearch } from './components/HeaderSearch'
 import { Logo } from './components/Logo'
@@ -12,6 +12,7 @@ import { Register } from './pages/Register'
 import { AccountMenu } from './components/AccountMenu'
 import { FavoritesNotice } from './components/FavoritesNotice'
 import { FavoritesProvider } from './favorites'
+import { UnreadProvider, useUnread } from './unread'
 import { Favorites } from './pages/Favorites'
 import { Home } from './pages/Home'
 import { PublicListing } from './pages/PublicListing'
@@ -37,7 +38,9 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <FavoritesProvider>
-          <AppContent />
+          <UnreadProvider>
+            <AppContent />
+          </UnreadProvider>
         </FavoritesProvider>
       </AuthProvider>
     </BrowserRouter>
@@ -46,6 +49,7 @@ function App() {
 
 function AppContent() {
   const { user, logout } = useAuth()
+  const { count: unread } = useUnread()
   return (
     <>
       <header className="site-header">
@@ -53,7 +57,7 @@ function AppContent() {
           <Logo />
           <HeaderSearch />
           <nav aria-label="Navigation principale">
-            <NavLink to="/" end className={navClass}>
+            <NavLink to="/" end className={(state) => `${navClass(state)} nav-home`}>
               <LayoutGrid size={20} aria-hidden />
               <span className="nav-label">Annonces</span>
             </NavLink>
@@ -65,6 +69,16 @@ function AppContent() {
               <Tag size={20} aria-hidden />
               <span className="nav-label">Mes annonces</span>
             </NavLink>
+            {user && (
+              <NavLink to="/messages" className={navClass}>
+                <span className="nav-icon">
+                  <MessageCircle size={20} aria-hidden />
+                  {unread > 0 && <span className="nav-badge" aria-hidden>{unread > 99 ? '99+' : unread}</span>}
+                </span>
+                <span className="nav-label">Messages</span>
+                {unread > 0 && <span className="sr-only">, {unread} non lu{unread > 1 ? 's' : ''}</span>}
+              </NavLink>
+            )}
             {!user && (
               <NavLink to="/login" className={navClass}>
                 <LogIn size={20} aria-hidden />
@@ -98,6 +112,7 @@ function AppContent() {
               <Route path="/achats/:id" element={<PaymentResult />} />
               <Route path="/paiement" element={<PaymentReturn />} />
               <Route path="/messages" element={<Messages />} />
+              <Route path="/messages/:id" element={<Messages />} />
             </Route>
             <Route path="/design" element={<DesignPage />} />
             <Route path="*" element={<Todo title="Page introuvable" task="—" />} />

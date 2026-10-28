@@ -2,10 +2,14 @@ import { MessageCircle, Send } from 'lucide-react'
 import { useId, useState, type FormEvent } from 'react'
 import { Link } from 'react-router'
 import { errorMessage } from '../listings'
-import { MAX_MESSAGE_LENGTH, sendMessage } from '../messages'
+import { MAX_MESSAGE_LENGTH, sendFirstMessage } from '../messages'
+import { useUnread } from '../unread'
 import { Alert } from './Alert'
 import { Button } from './Button'
 import { Field } from './Field'
+
+// Premiers messages proposés, comme sur les grands sites entre particuliers
+const QUICK_REPLIES = ['Bonjour, est-il toujours disponible ?', 'Le prix est-il négociable ?', 'Je suis intéressé(e), quand puis-je passer ?']
 
 type Props = {
   listingId: string
@@ -21,7 +25,8 @@ export function ContactSeller({ listingId, primary, connected, open, onOpenChang
   const [body, setBody] = useState('')
   const [fieldError, setFieldError] = useState<string | undefined>()
   const [serverError, setServerError] = useState('')
-  const [sent, setSent] = useState(false)
+  const [conversationId, setConversationId] = useState<string | null>(null)
+  const { refresh } = useUnread()
   const [sending, setSending] = useState(false)
 
   if (!connected) {
@@ -36,7 +41,7 @@ export function ContactSeller({ listingId, primary, connected, open, onOpenChang
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setServerError('')
-    setSent(false)
+    setConversationId(null)
     if (!body.trim()) {
       setFieldError('Écrivez votre message avant de l’envoyer.')
       return
@@ -44,9 +49,10 @@ export function ContactSeller({ listingId, primary, connected, open, onOpenChang
     setFieldError(undefined)
     setSending(true)
     try {
-      await sendMessage(listingId, body.trim())
+      const result = await sendFirstMessage(listingId, body.trim())
       setBody('')
-      setSent(true)
+      setConversationId(result.conversationId)
+      refresh()
     } catch (cause) {
       setServerError(errorMessage(cause))
     } finally {
@@ -69,9 +75,20 @@ export function ContactSeller({ listingId, primary, connected, open, onOpenChang
       </button>
       {open && (
         <div id={panelId} className="contact-panel" role="region" aria-label="Contacter le vendeur">
-          {sent && <Alert type="success">Message envoyé. Le vendeur le retrouvera dans ses messages.</Alert>}
+          {conversationId && (
+            <Alert type="success">
+              Message envoyé. <Link to={`/messages/${conversationId}`}>Voir la conversation</Link>
+            </Alert>
+          )}
           {serverError && <Alert type="error">{serverError}</Alert>}
           <form className="stack" onSubmit={submit} noValidate>
+            <div className="chips" aria-label="Messages rapides">
+              {QUICK_REPLIES.map((text) => (
+                <button key={text} type="button" className="chip chip-sm" onClick={() => { setBody(text); setFieldError(undefined) }}>
+                  {text}
+                </button>
+              ))}
+            </div>
             <Field
               as="textarea"
               label="Votre message"
@@ -83,7 +100,7 @@ export function ContactSeller({ listingId, primary, connected, open, onOpenChang
               onChange={(event) => {
                 setBody(event.target.value)
                 setFieldError(undefined)
-                setSent(false)
+                setConversationId(null)
               }}
             />
             <Button type="submit" variant="night" className="btn-block" loading={sending}>

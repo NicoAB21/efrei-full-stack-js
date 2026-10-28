@@ -21,7 +21,7 @@ tags:
   - name: purchases
     description: Paiement de DÉMONSTRATION (Stripe en mode test, spec 005) ; routes absentes si aucune clé de test n'est configurée
   - name: messages
-    description: Messagerie acheteur → vendeur (US5)
+    description: Messagerie privée acheteur ↔ vendeur, une conversation par annonce (US5)
 
 paths:
   /api/health:
@@ -211,36 +211,35 @@ paths:
       - $ref: '#/components/parameters/Id'
     post:
       tags: [messages]
-      summary: Écrire au vendeur d'une annonce disponible
+      summary: Écrire au vendeur depuis une annonce disponible (ouvre ou reprend la conversation)
       description: >
-        Le destinataire est le propriétaire de l'annonce, calculé par le serveur ; l'expéditeur vient du JWT.
-        Seuls l'expéditeur et le vendeur peuvent voir le message.
+        Une conversation par couple acheteur–annonce ; le vendeur est calculé par le serveur, l'expéditeur vient du JWT.
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required: [body]
-              properties:
-                body: { type: string, minLength: 1, maxLength: 1000, description: Espaces de début et de fin retirés }
+            schema: { $ref: '#/components/schemas/MessageCreate' }
       responses:
         '201':
           description: Envoyé
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Message' }
+              schema:
+                type: object
+                required: [conversationId, message]
+                properties:
+                  conversationId: { type: string }
+                  message: { $ref: '#/components/schemas/ChatMessage' }
         '400':
           description: Corps invalide, id mal formé, ou message sur sa propre annonce
           content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }   # inexistante ou vendue
 
-  /api/messages:
+  /api/conversations:
     get:
       tags: [messages]
-      summary: Messages reçus par le compte connecté, du plus récent au plus ancien
+      summary: Mes conversations (acheteur ou vendeur), la plus récente en tête
       responses:
         '200':
           description: OK
@@ -252,8 +251,82 @@ paths:
                 properties:
                   items:
                     type: array
-                    items: { $ref: '#/components/schemas/ReceivedMessage' }
+                    items: { $ref: '#/components/schemas/Conversation' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/conversations/unread:
+    get:
+      tags: [messages]
+      summary: Nombre total de messages non lus (pastille)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [count]
+                properties:
+                  count: { type: integer }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/conversations/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [messages]
+      summary: Une conversation et tous ses messages (participants seulement)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Conversation'
+                  - type: object
+                    required: [messages, otherReadAt]
+                    properties:
+                      otherReadAt: { type: string, format: date-time, nullable: true, description: Dernière lecture de l'interlocuteur (mention « Vu ») }
+                      messages:
+                        type: array
+                        items: { $ref: '#/components/schemas/ChatMessage' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }   # inexistante ou conversation d'autres personnes
+
+  /api/conversations/{id}/messages:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    post:
+      tags: [messages]
+      summary: Répondre dans une conversation (même si l'annonce est vendue ou supprimée)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MessageCreate' }
+      responses:
+        '201':
+          description: Envoyé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ChatMessage' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/conversations/{id}/read:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    post:
+      tags: [messages]
+      summary: Marquer la conversation comme lue (remet ses non-lus à zéro)
+      responses:
+        '204': { description: Lue }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
 
   /api/favorites:
     get:
@@ -638,24 +711,52 @@ components:
         createdAt: { type: string, format: date-time }
         confirmedAt: { type: string, format: date-time, nullable: true }
 
-    Message:
+    MessageCreate:
       type: object
-      required: [id, listingId, senderId, recipientId, body, createdAt]
+      additionalProperties: false
+      required: [body]
+      properties:
+        body: { type: string, minLength: 1, maxLength: 1000, description: Espaces de début et de fin retirés }
+
+    ChatMessage:
+      type: object
+      required: [id, body, createdAt, mine]
       properties:
         id: { type: string }
-        listingId: { type: string }
-        senderId: { type: string }
-        recipientId: { type: string }
         body: { type: string }
         createdAt: { type: string, format: date-time }
+        mine: { type: boolean, description: Écrit par le compte connecté }
 
-    ReceivedMessage:
-      allOf:
-        - $ref: '#/components/schemas/Message'
-        - type: object
-          required: [listingTitle]
+    Conversation:
+      type: object
+      required: [id, role, other, listing, lastMessage, unread]
+      properties:
+        id: { type: string }
+        role: { type: string, enum: [buyer, seller], description: Rôle du compte connecté }
+        other:
+          type: object
+          required: [label, role]
           properties:
-            listingTitle: { type: string, nullable: true, description: null si l'annonce a été supprimée }
+            label: { type: string, description: « Membre XXXX », jamais l'email }
+            role: { type: string, enum: [buyer, seller] }
+        listing:
+          type: object
+          required: [id, title, photoUrl, priceCents, status]
+          description: Annonce d'origine, titre, photo et prix figés au premier message
+          properties:
+            id: { type: string }
+            title: { type: string }
+            photoUrl: { type: string, nullable: true }
+            priceCents: { type: integer }
+            status: { type: string, enum: [available, sold, deleted] }
+        lastMessage:
+          type: object
+          nullable: true
+          properties:
+            body: { type: string }
+            at: { type: string, format: date-time }
+            mine: { type: boolean }
+        unread: { type: integer, description: Messages non lus par le compte connecté }
 
     Error:
       type: object

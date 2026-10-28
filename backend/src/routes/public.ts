@@ -4,7 +4,7 @@ import { isBuyable } from '../schemas/purchase.js'
 import { objectIdParam } from '../schemas/common.js'
 import { publicQuerySchema } from '../schemas/listing.js'
 import { getPublic, listPublic } from '../services/listing.service.js'
-import * as messageController from '../controllers/message.controller.js'
+import * as conversationController from '../controllers/conversation.controller.js'
 import { requireAuth } from '../middleware/auth.js'
 
 export const publicRouter = Router()
@@ -19,4 +19,4 @@ publicRouter.get('/:id', async (req, res) => {
   res.json({ ...listing.toJSON(), buyable: paymentsConfig() !== null && isBuyable(listing) })
 })
 
-publicRouter.post('/:id/messages', requireAuth, messageController.send)
+publicRouter.post('/:id/messages', requireAuth, conversationController.start)

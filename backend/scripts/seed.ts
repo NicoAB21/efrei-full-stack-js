@@ -4,12 +4,15 @@
 // Photos : seed/photos/ (Wikimedia Commons, licences libres, crédits dans seed/photos/CREDITS.md).
 import { readFile } from 'node:fs/promises'
 import mongoose from 'mongoose'
+import { Conversation } from '../src/models/conversation.js'
 import { Favorite } from '../src/models/favorite.js'
 import { Listing } from '../src/models/listing.js'
+import { Message } from '../src/models/message.js'
 import { Purchase } from '../src/models/purchase.js'
 import { User } from '../src/models/user.js'
 import type { ListingCreateInput } from '../src/schemas/listing.js'
 import { register } from '../src/services/auth.service.js'
+import * as conversationService from '../src/services/conversation.service.js'
 import * as favoriteService from '../src/services/favorite.service.js'
 import * as listingService from '../src/services/listing.service.js'
 import * as photoService from '../src/services/photo.service.js'
@@ -202,6 +205,22 @@ Semelles en très bon état. Envoi possible via Mondial Relay.` },
   ],
 }
 
+// Conversations de démonstration : [acheteur, annonce, puis les messages en alternance acheteur / vendeur]
+const CONVERSATIONS: [string, string, string[]][] = [
+  ['emma@occaz.test', 'iPhone 13 128 Go bleu, très bon état', [
+    'Bonjour, l’iPhone est toujours disponible ? Vous accepteriez 350 € ?',
+    'Bonjour ! Oui, toujours dispo. Je peux descendre à 370 €, il est vraiment en très bon état.',
+    'Ok pour 370 €. Je peux passer jeudi soir vers 19 h ?',
+  ]],
+  ['alice@occaz.test', 'Canapé de style Louis XV, velours rouge', [
+    'Bonjour, il est magnifique ! Vous avez les dimensions exactes (profondeur et hauteur) ?',
+  ]],
+  ['david@occaz.test', 'Guitare électro-acoustique + housse', [
+    'Bonjour, la housse est rigide ou souple ?',
+    'Bonjour, souple mais bien rembourrée. Je vous envoie une photo si vous voulez.',
+  ]],
+]
+
 // Favoris de démonstration : emma suit quelques annonces des autres
 const FAVORITES_OF = {
   'emma@occaz.test': ['Vélo de ville bleu, cadre acier', 'iPhone 13 128 Go bleu, très bon état', 'Canapé de style Louis XV, velours rouge'],
@@ -221,6 +240,9 @@ for (const user of previous) {
   const ownerId = String(user._id)
   for (const listing of await Listing.find({ ownerId })) await listingService.remove(ownerId, String(listing._id))
   await Favorite.deleteMany({ userId: user._id })
+  const conversations = await Conversation.find({ $or: [{ buyerId: user._id }, { sellerId: user._id }] }).select('_id')
+  await Message.deleteMany({ conversationId: { $in: conversations.map((c) => c._id) } })
+  await Conversation.deleteMany({ _id: { $in: conversations.map((c) => c._id) } })
   await Purchase.deleteMany({ buyerId: user._id })
 }
 await User.deleteMany({ email: SEED_EMAILS })
@@ -251,7 +273,16 @@ for (const [email, favorites] of Object.entries(FAVORITES_OF)) {
   for (const title of favorites) await favoriteService.add(ids.get(email) as string, titles.get(title) as string)
 }
 
+const ownerOf = new Map(Object.entries(ACCOUNTS).flatMap(([email, seeds]) => seeds.map((seed) => [seed.title, email] as const)))
+for (const [buyerEmail, title, messages] of CONVERSATIONS) {
+  const buyerId = ids.get(buyerEmail) as string
+  const sellerId = ids.get(ownerOf.get(title) as string) as string
+  const [first, ...rest] = messages
+  const { conversationId } = await conversationService.start(buyerId, titles.get(title) as string, first)
+  for (const [i, body] of rest.entries()) await conversationService.reply(i % 2 === 0 ? sellerId : buyerId, conversationId, body)
+}
+
 const total = Object.values(ACCOUNTS).reduce((n, seeds) => n + seeds.length, 0)
-console.log(`${ids.size} comptes, ${total} annonces et ${photoCount} photos créés (mot de passe commun : ${PASSWORD})`)
+console.log(`${ids.size} comptes, ${total} annonces, ${photoCount} photos et ${CONVERSATIONS.length} conversations créés (mot de passe commun : ${PASSWORD})`)
 for (const [email, seeds] of Object.entries(ACCOUNTS)) console.log(`  ${email.padEnd(18)} ${seeds.length} annonces`)
 await mongoose.disconnect()

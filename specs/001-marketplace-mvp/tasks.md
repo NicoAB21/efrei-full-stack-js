@@ -202,6 +202,7 @@ Pendant la Phase 2, Kelyan et Ismael peuvent déjà écrire les tests de leur st
 - [x] T049 [P] [US5] Créer `backend/src/models/message.ts` : `listingId`, `senderId`, `recipientId` ObjectId requis ; `body` « après `trim` : 1 à 1000 caractères » ; `timestamps: true` ; index `{ recipientId: 1, createdAt: -1 }`
 - [x] T050 [US5] Créer `backend/src/services/message.service.ts`, contrôleur et routes : `POST /api/public/listings/:id/messages` (auth requise, `recipientId` = `ownerId` calculé serveur) et `GET /api/messages` (reçus par `req.userId`) ; monter dans `backend/src/app.ts`
 - [x] T051 [US5] Front : formulaire « Contacter le vendeur » dans `frontend/src/pages/PublicListing.tsx` (masqué si `ownerId === user.id` ou non connecté) et page `frontend/src/pages/Messages.tsx` (route `/messages`)
+- [x] T057 [US5] Évolution en messagerie privée (après T048–T051) : modèle `Conversation` (une par couple acheteur–annonce, titre/photo/prix figés, non-lus et dernière lecture de chaque côté) et `Message { conversationId, senderId, body }` ; routes `GET /api/conversations`, `GET /api/conversations/unread`, `GET /api/conversations/:id`, `POST /api/conversations/:id/messages`, `POST /api/conversations/:id/read` (participants seulement, sinon 404) ; `POST /api/public/listings/:id/messages` ouvre ou reprend la conversation ; front : pastille rouge dans l'en-tête, `/messages/:id` en deux colonnes, mention « Vu », messages rapides ; tests `backend/tests/conversations.test.ts` (remplace `messages.test.ts`)
 
 ---
 

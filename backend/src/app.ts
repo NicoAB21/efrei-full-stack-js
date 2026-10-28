@@ -13,7 +13,7 @@ import { uploadsDir } from './photos/storage.js'
 import { paymentsConfig } from './config.js'
 import { purchasesRouter } from './routes/purchases.js'
 import { stripeWebhookRouter } from './routes/stripe-webhook.js'
-import { messagesRouter } from './routes/messages.js'
+import { conversationsRouter } from './routes/conversations.js'
 
 const openapi = parse(readFileSync(new URL('../openapi.yaml', import.meta.url), 'utf8'))
 z.config(z.locales.fr())
@@ -40,7 +40,7 @@ export function createApp() {
   app.use('/api/favorites', favoritesRouter)
   app.use('/api/communes', communesRouter)
   if (payments) app.use('/api/purchases', purchasesRouter)
-  app.use('/api/messages', messagesRouter)
+  app.use('/api/conversations', conversationsRouter)
 
   // Photos d'annonces : fichiers statiques, sans liste du dossier, jamais interprétés autrement qu'en image
   app.use(
