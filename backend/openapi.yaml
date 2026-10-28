@@ -4,7 +4,8 @@ info:
   version: 1.0.0
   description: >
     API de petites annonces (Contrat API v1 du livret appliqué à la ressource `listings`).
-    Routes marquées P2/P3 = extensions, à implémenter après le MVP.
+    Ce document décrit les routes réellement implémentées (MVP US1–US3 + vitrine publique US4).
+    Prix en centimes. Toute erreur : {"error":{"code","message"}}.
 servers:
   - url: http://localhost:3000
 tags:
@@ -12,9 +13,7 @@ tags:
   - name: auth
   - name: listings
   - name: public
-    description: P2 — vitrine publique
-  - name: messages
-    description: P3 — messagerie
+    description: Vitrine publique (US4), sans authentification
 
 paths:
   /api/health:
@@ -143,7 +142,10 @@ paths:
   /api/public/listings:
     get:
       tags: [public]
-      summary: P2 — Annonces disponibles de tous les vendeurs (50 max, plus récentes d'abord)
+      summary: Annonces disponibles de tous les vendeurs (50 max, plus récentes d'abord)
+      description: >
+        Les annonces vendues ne sont jamais renvoyées. 400 si un paramètre est inconnu ou invalide,
+        ou si minPrice est supérieur à maxPrice. `city` est comparée sans tenir compte de la casse.
       security: []
       parameters:
         - { name: category, in: query, schema: { $ref: '#/components/schemas/Category' } }
@@ -164,7 +166,8 @@ paths:
       - $ref: '#/components/parameters/Id'
     get:
       tags: [public]
-      summary: P2 — Détail d'une annonce disponible
+      summary: Détail d'une annonce disponible
+      description: 404 si l'annonce n'existe pas ou est vendue. Aucune donnée personnelle du vendeur.
       security: []
       responses:
         '200':
@@ -175,49 +178,6 @@ paths:
         '400': { $ref: '#/components/responses/InvalidInput' }
         '404': { $ref: '#/components/responses/NotFound' }
 
-  /api/public/listings/{id}/messages:
-    parameters:
-      - $ref: '#/components/parameters/Id'
-    post:
-      tags: [messages]
-      summary: P3 — Écrire au vendeur d'une annonce disponible (pas la sienne)
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              required: [body]
-              properties:
-                body: { type: string, minLength: 1, maxLength: 1000 }
-      responses:
-        '201':
-          description: Envoyé
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Message' }
-        '400': { $ref: '#/components/responses/InvalidInput' }
-        '401': { $ref: '#/components/responses/Unauthorized' }
-        '404': { $ref: '#/components/responses/NotFound' }
-
-  /api/messages:
-    get:
-      tags: [messages]
-      summary: P3 — Messages reçus par le compte connecté
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [items]
-                properties:
-                  items:
-                    type: array
-                    items: { $ref: '#/components/schemas/Message' }
-        '401': { $ref: '#/components/responses/Unauthorized' }
 
 security:
   - bearerAuth: []
@@ -309,17 +269,6 @@ components:
           type: array
           items: { $ref: '#/components/schemas/Listing' }
 
-    Message:
-      type: object
-      required: [id, listingId, senderId, recipientId, body, createdAt]
-      properties:
-        id: { type: string }
-        listingId: { type: string }
-        senderId: { type: string }
-        recipientId: { type: string }
-        body: { type: string }
-        createdAt: { type: string, format: date-time }
-
     Error:
       type: object
       required: [error]
@@ -330,7 +279,8 @@ components:
           properties:
             code:
               type: string
-              enum: [INVALID_INPUT, UNAUTHORIZED, NOT_FOUND, EMAIL_ALREADY_USED]
+              enum: [INVALID_INPUT, UNAUTHORIZED, NOT_FOUND, EMAIL_ALREADY_USED, INTERNAL_ERROR]
+              description: INTERNAL_ERROR uniquement pour une erreur serveur imprévue (500), sans détail technique
             message: { type: string }
 
   responses:

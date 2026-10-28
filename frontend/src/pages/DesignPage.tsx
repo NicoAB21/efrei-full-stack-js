@@ -86,7 +86,8 @@ export function DesignPage() {
 
       <Section title="Typographie">
         <p style={{ fontSize: 'var(--fs-display)', fontWeight: 900, letterSpacing: '-0.035em', lineHeight: 1.05 }}>Display 900</p>
-        <h1>Titre h1 900</h1>
+        {/* Exemples en <p> : une page n'a qu'un seul h1 */}
+        <p style={{ fontSize: 'var(--fs-h1)', fontWeight: 900, letterSpacing: '-0.035em', lineHeight: 1.1 }}>Titre h1 900</p>
         <h2>Titre h2 800</h2>
         <h3>Titre h3 700</h3>
         <p>Corps 15 px, Inter 400. Phrases courtes, des faits plutôt que des adjectifs.</p>
@@ -95,7 +96,9 @@ export function DesignPage() {
 
       <Section title="Hero">
         <div className="hero">
-          <h1>Vos objets ont encore de la valeur.</h1>
+          <p style={{ fontSize: 'var(--fs-display)', fontWeight: 900, letterSpacing: '-0.035em', lineHeight: 1.1, maxWidth: '14ch', margin: 0 }}>
+            Vos objets ont encore de la valeur.
+          </p>
           <p>Vendez ce qui dort chez vous, trouvez la bonne affaire près de chez vous. Une annonce en moins de 2 minutes.</p>
           <div className="row">
             <Link to="/listings/new" className="btn btn-white">Publier une annonce</Link>

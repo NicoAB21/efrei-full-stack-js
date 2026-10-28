@@ -209,10 +209,10 @@ Pendant la Phase 2, Kelyan et Ismael peuvent déjà écrire les tests de leur st
 
 **Assigné à** : Nicolas (chacun relit sa partie)
 
-- [ ] T052 [P] Mettre à jour `backend/openapi.yaml` pour qu'il corresponde exactement aux routes réellement implémentées
-- [ ] T053 [P] Compléter `README.md` : présentation, prérequis, lancement Docker et local, variables d'environnement, commandes `lint`/`build`/`test`, lien Swagger, choix techniques
-- [ ] T054 Passe accessibilité et mobile : parcours complet au clavier seul et à 375 px (SC-006), boutons nommés, focus visible dans `frontend/src/index.css`
-- [ ] T055 Dérouler [quickstart.md](./quickstart.md) en entier ; vérifier qu'aucun secret, `.env` ou `node_modules` n'est versionné
+- [x] T052 [P] Mettre à jour `backend/openapi.yaml` pour qu'il corresponde exactement aux routes réellement implémentées → 7 routes réelles documentées (messagerie US5 retirée tant qu'elle n'existe pas), cas 400/404 de la vitrine, code INTERNAL_ERROR ; `tests/openapi.test.ts` vérifie que chaque route documentée existe (contre-épreuve : une route fantôme fait échouer le test)
+- [x] T053 [P] Compléter `README.md` : présentation, prérequis, lancement Docker et local, variables d'environnement, commandes `lint`/`build`/`test`, lien Swagger, choix techniques → fonctionnalités, architecture, choix techniques, sécurité, tests, limites et évolutions
+- [x] T054 Passe accessibilité et mobile : parcours complet au clavier seul et à 375 px (SC-006), boutons nommés, focus visible dans `frontend/src/index.css` → **fait le 2026-10-28** à 375 px sur les 10 pages : aucun défilement horizontal, champs labellisés, boutons/liens nommés, focus visible sur 100 % des éléments atteints au Tab ; parcours clavier seul inscription → publication → vendue → suppression OK ; corrigés : cible « Filtrer par prix » (44 px), saut h1→h3 dans Mes annonces, 3 h1 sur /design
+- [x] T055 Dérouler [quickstart.md](./quickstart.md) en entier ; vérifier qu'aucun secret, `.env` ou `node_modules` n'est versionné → scénarios API du quickstart : 19/19 conformes, persistance après redémarrage OK, DELETE 204 sans corps puis 404, aucune réponse avec `_id`/`password` ; aucun secret ni `.env` suivi par git (historique compris). Lancement Docker non rejoué (Docker Desktop arrêté) : vérifié sur une stack locale équivalente
 
 ---
 

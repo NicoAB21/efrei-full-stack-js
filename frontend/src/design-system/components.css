@@ -290,8 +290,8 @@ img, svg { display: block; max-width: 100%; }
 /* ——— Panneaux ——— */
 .panel { background: var(--surface); border-radius: var(--r-lg); padding: var(--s-5); display: grid; gap: var(--s-4); box-shadow: var(--shadow); }
 /* Panneau repliable (<details class="panel">) : compact quand il est fermé */
-details.panel:not([open]) { gap: 0; padding-block: var(--s-4); }
-details.panel > summary { cursor: pointer; font-weight: 700; }
+details.panel:not([open]) { gap: 0; padding-block: var(--s-2); }
+details.panel > summary { cursor: pointer; font-weight: 700; padding-block: 11px; } /* cible de 44 px */
 .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: var(--s-2); }
 .facts div { background: var(--soft); border-radius: var(--r-sm); padding: 10px 14px; font-size: var(--fs-sm); color: var(--text-2); }
 .facts b { display: block; color: var(--text); font-size: 15px; }

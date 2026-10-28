@@ -65,11 +65,15 @@ export function MyListings() {
           Un objet qui dort dans un placard ? Donnez-lui une seconde vie.
         </EmptyState>
       ) : (
-        <div className="listing-grid">
-          {listings.map((listing) => (
-            <ListingCard key={listing.id} listing={listing} to={`/listings/${listing.id}`} />
-          ))}
-        </div>
+        <section aria-labelledby="my-listings-title">
+          {/* Titre lu par les lecteurs d'écran : évite le saut h1 → h3 des cartes */}
+          <h2 id="my-listings-title" className="sr-only">Liste de vos annonces</h2>
+          <div className="listing-grid">
+            {listings.map((listing) => (
+              <ListingCard key={listing.id} listing={listing} to={`/listings/${listing.id}`} />
+            ))}
+          </div>
+        </section>
       )}
     </div>
   )

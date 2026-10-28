@@ -1,11 +1,69 @@
 # Occaz
 
-Site de petites annonces entre particuliers (principe Leboncoin) : module EFREI « Full Stack JS ».
+**Vos objets ont encore de la valeur.** Occaz est un site de petites annonces entre particuliers, sur le principe de Leboncoin : on publie un objet en moins de 2 minutes, on le retrouve dans « Mes annonces », et tout visiteur peut parcourir et filtrer les annonces disponibles.
 
-- `frontend/` : React + Vite + TypeScript
-- `backend/` : Node.js + Express 5 + Mongoose + TypeScript
-- `specs/001-marketplace-mvp/` : spec, plan, contrat API et **tâches** (spec-kit)
-- Design system « Étiquette » : [`docs/design-system.md`](docs/design-system.md), règles dans [`frontend/src/design-system/GUIDE.md`](frontend/src/design-system/GUIDE.md), aperçu sur `/design`
+Projet du module EFREI « Full Stack JS » (M1, octobre 2026), réalisé par Nicolas, Kelyan et Ismael.
+
+## Fonctionnalités
+
+| | Fonctionnalité | Accès |
+|---|---|---|
+| US1 | Inscription, connexion, déconnexion (email + mot de passe ≥ 8 caractères), session JWT | public |
+| US2 | **Mes annonces** : publier, lister, consulter, modifier (prix, statut « vendue »…), supprimer avec confirmation | connecté |
+| US3 | **Isolation** : un vendeur ne peut ni voir, ni modifier, ni supprimer les annonces d'un autre (404) | serveur |
+| US4 | **Vitrine** : annonces disponibles de tous les vendeurs, recherche (mot-clé, ville), catégories, fourchette de prix, détail sans donnée privée | public |
+| + | Favoris (cœur sur les cartes, gardés dans le navigateur), sélections « Petits prix » et « Près de chez vous » | public |
+
+Pages : `/` (annonces), `/annonces/:id` (détail public), `/login`, `/register`, `/listings` (mes annonces), `/listings/new`, `/listings/:id`, `/listings/:id/edit`, `/design` (design system).
+
+## Architecture
+
+```text
+frontend/  React 19 + Vite + TypeScript ─┐  /api/* (proxy Vite, pas de CORS)
+                                          ▼
+backend/   Express 5 + TypeScript : routes → contrôleurs → services → modèles Mongoose ──► MongoDB 7
+```
+
+- **Back** ([`backend/src/`](backend/src/)) : `routes/` déclarent les URL et les middlewares, `controllers/` lisent la requête, `services/` portent la logique métier et les règles d'accès, `models/` décrivent les collections. `schemas/` contient la validation Zod, `errors.ts` le format d'erreur unique, `middleware/auth.ts` la vérification du JWT.
+- **Front** ([`frontend/src/`](frontend/src/)) : `pages/` (une par écran), `components/` (briques du design system), `api.ts` (fetch + JWT + gestion du 401), `auth.tsx` (session), `price.ts` (centimes ↔ euros).
+- **Données** : `users` et `listings` ; MCD/MLD dans [`specs/001-marketplace-mvp/data-model.md`](specs/001-marketplace-mvp/data-model.md).
+- **Contrat API** : Swagger sur http://localhost:3000/api/docs, généré depuis [`backend/openapi.yaml`](backend/openapi.yaml) (un test vérifie que chaque route documentée existe).
+
+## Choix techniques
+
+| Choix | Pourquoi |
+|---|---|
+| TypeScript partout | Types partagés par la conception, erreurs vues à la compilation (le livret autorise TS à la place de JS) |
+| Express 5 | Les erreurs des handlers `async` remontent seules au middleware d'erreur, sans wrapper |
+| Zod `.strict()` | Validation serveur lisible ; refuse d'office les champs inconnus, `id` et `ownerId` envoyés par le client |
+| Prix en centimes | Entiers exacts : pas d'erreur d'arrondi (`19,99 €` = `1999`), conversion en euros seulement à l'affichage |
+| Proxy Vite | Le front appelle `/api` en relatif : pas de CORS ni de dépendance `cors` |
+| Design system maison | CSS natif + tokens, icônes Lucide, police Inter hébergée : aucune librairie d'interface ([`docs/design-system.md`](docs/design-system.md)) |
+| spec-kit | Constitution → spec → plan → tâches → implémentation : chaque fonctionnalité a ses critères d'acceptation |
+
+## Sécurité
+
+- **Mots de passe** hachés avec bcrypt (coût 10), jamais renvoyés (`passwordHash` retiré de toutes les réponses).
+- **JWT** HS256 signé avec `JWT_SECRET` (variable d'environnement, jamais versionnée), expiration 2 h ; `requireAuth` renvoie 401 si absent, falsifié ou expiré.
+- **Isolation des comptes** : chaque requête sur une annonce filtre `{ _id, ownerId }` dans le service. L'annonce d'un autre compte répond **404, comme une annonce inexistante** (pas 403 : on ne révèle pas qu'elle existe). Prouvé par [`isolation.test.ts`](backend/tests/isolation.test.ts) et une contre-épreuve (retirer le filtre fait échouer les tests).
+- **Validation côté serveur** de chaque entrée (corps, paramètres, id) ; la validation React ne sert qu'au confort.
+- **Erreurs** au format unique `{"error":{"code","message"}}`, sans détail technique en cas d'erreur 500.
+
+## Tests
+
+`npm test` dans `backend/` lance Jest + Supertest sur une MongoDB en mémoire (base isolée, vidée avant chaque test) :
+
+| Fichier | Ce qu'il prouve |
+|---|---|
+| `health.test.ts` | santé de l'API, 404 et JSON mal formé au bon format |
+| `auth-middleware.test.ts` | 401 sans token, token falsifié, expiré, autre secret |
+| `auth.test.ts` | inscription, email unique sans tenir compte de la casse, connexion, message neutre |
+| `listings.test.ts` | CRUD complet, 400 sur chaque entrée invalide, 401 sur chaque route |
+| `isolation.test.ts` | B ne peut rien faire sur l'annonce de A (404 identique à un id inexistant) |
+| `public.test.ts` | vitrine : jamais d'annonce vendue, filtres, aucune donnée privée |
+| `openapi.test.ts` | chaque route décrite dans Swagger existe vraiment |
+
+Côté front, `npm test` (`node --test`, sans dépendance) vérifie la conversion des prix et `api.ts` : envoi du token, erreurs de connexion, retour à la connexion quand la session expire.
 
 ## Prérequis
 
@@ -102,3 +160,11 @@ echo '{ "feature_directory": "specs/001-marketplace-mvp" }' > .specify/feature.j
 ```
 
 Le contrat d'API de référence est [`specs/001-marketplace-mvp/contracts/openapi.yaml`](specs/001-marketplace-mvp/contracts/openapi.yaml).
+
+## Limites et évolutions
+
+- **Photos d'annonces** : pas encore d'upload (les cartes affichent le pictogramme de la catégorie). Évolution prévue : `multer`, JPEG/PNG/WebP vérifiés, 5 Mo max.
+- **Favoris** gardés dans le navigateur ; évolution prévue : favoris liés au compte (spec `002-favoris`).
+- **Ville** en texte libre ; évolution possible : communes officielles via `geo.api.gouv.fr`.
+- **Messagerie** acheteur → vendeur (US5) spécifiée mais pas encore réalisée.
+- **Paiement** volontairement hors périmètre (la spec l'exclut) : un vrai paiement entre particuliers demanderait Stripe Connect.
