@@ -1,0 +1,57 @@
+# Fragment OpenAPI à fusionner dans backend/openapi.yaml à l'implémentation.
+# Modifie aussi ListingCreate / ListingUpdate (city → cityCode + postalCode) et Listing (+ cityCode, postalCode),
+# et ajoute le paramètre cityCode à GET /api/public/listings.
+paths:
+  /api/communes:
+    get:
+      tags: [communes]
+      summary: Suggestions de communes officielles (par début de nom ou code postal)
+      security: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: 2 à 60 caractères ; casse, accents et tirets ignorés ; chiffres = code postal
+          schema: { type: string, minLength: 2, maxLength: 60 }
+      responses:
+        '200':
+          description: 20 suggestions maximum, une par couple commune / code postal
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    maxItems: 20
+                    items: { $ref: '#/components/schemas/CommuneSuggestion' }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+
+components:
+  schemas:
+    CommuneSuggestion:
+      type: object
+      required: [cityCode, name, postalCode, department, label]
+      properties:
+        cityCode: { type: string, example: '69123' }
+        name: { type: string, example: Lyon }
+        postalCode: { type: string, example: '69003' }
+        department: { type: string, example: '69' }
+        label: { type: string, example: Lyon (69003) }
+
+    # Remplace `city` dans ListingCreate ; dans ListingUpdate, les deux sont facultatifs mais vont ensemble.
+    ListingLocationInput:
+      type: object
+      required: [cityCode, postalCode]
+      properties:
+        cityCode: { type: string, pattern: '^[0-9][0-9AB][0-9]{3}$', description: Code officiel de la commune }
+        postalCode: { type: string, pattern: '^[0-9]{5}$', description: Doit appartenir à la commune }
+
+    # Ajouté au schéma Listing en sortie (city reste présent, calculé par le serveur)
+    ListingLocation:
+      type: object
+      properties:
+        city: { type: string, description: Nom officiel, ou texte d'origine si non rattachée }
+        cityCode: { type: string, nullable: true }
+        postalCode: { type: string, nullable: true }

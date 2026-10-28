@@ -1,0 +1,87 @@
+# Fragment OpenAPI à fusionner dans backend/openapi.yaml (paths + components) à l'implémentation.
+# Réutilise les composants existants : bearerAuth, Id, Listing, Error, InvalidInput, Unauthorized, NotFound.
+paths:
+  /api/favorites:
+    get:
+      tags: [favorites]
+      summary: Mes favoris, du plus récemment ajouté au plus ancien
+      description: >
+        Annonces existantes uniquement (une annonce supprimée disparaît), y compris vendues
+        (status = sold, à afficher « plus disponible »). Aucune donnée privée du vendeur.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    maxItems: 200
+                    items: { $ref: '#/components/schemas/FavoriteListing' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/favorites/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'   # id de l'ANNONCE
+    put:
+      tags: [favorites]
+      summary: Ajouter une annonce à mes favoris (idempotent)
+      responses:
+        '204': { description: Dans mes favoris (ajoutée ou déjà présente) }
+        '400':
+          description: Id mal formé, sa propre annonce, ou limite de 200 favoris atteinte
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }   # inexistante ou vendue
+    delete:
+      tags: [favorites]
+      summary: Retirer une annonce de mes favoris
+      responses:
+        '204': { description: Retirée }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }   # pas dans MES favoris
+
+  /api/favorites/import:
+    post:
+      tags: [favorites]
+      summary: Importer les favoris du navigateur à la connexion
+      description: Ignore les ids inexistants, vendus, déjà présents ou appartenant à l'utilisateur.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [listingIds]
+              properties:
+                listingIds:
+                  type: array
+                  maxItems: 200
+                  items: { type: string, pattern: '^[a-fA-F0-9]{24}$' }
+      responses:
+        '200':
+          description: Ids réellement importés
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items: { type: array, items: { type: string } }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+components:
+  schemas:
+    FavoriteListing:
+      allOf:
+        - $ref: '#/components/schemas/Listing'
+        - type: object
+          required: [favoritedAt]
+          properties:
+            favoritedAt: { type: string, format: date-time }

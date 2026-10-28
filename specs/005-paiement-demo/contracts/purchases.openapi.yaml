@@ -1,0 +1,80 @@
+# Fragment OpenAPI à fusionner dans backend/openapi.yaml à l'implémentation.
+# Ajoute aussi `soldOnline` (facultatif, réponses privées du propriétaire) au schéma Listing.
+paths:
+  /api/purchases:
+    post:
+      tags: [purchases]
+      summary: Lancer l'achat (DÉMONSTRATION, mode test Stripe) d'une annonce disponible
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [listingId]
+              properties:
+                listingId: { type: string, pattern: '^[a-fA-F0-9]{24}$' }
+      responses:
+        '201':
+          description: URL de la page de paiement Stripe (ou celle d'un achat en attente déjà ouvert)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [url]
+                properties:
+                  url: { type: string, format: uri }
+        '400':
+          description: Sa propre annonce, catégorie Immobilier/Véhicules ou prix > 10 000 €
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }   # inexistante, vendue, ou paiement désactivé
+    get:
+      tags: [purchases]
+      summary: Mes achats, du plus récent au plus ancien
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Purchase' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/stripe/webhook:
+    post:
+      tags: [purchases]
+      summary: Confirmation Stripe (signature `Stripe-Signature` obligatoire, corps brut)
+      security: []
+      description: >
+        Appelé par Stripe uniquement. Traite checkout.session.completed et checkout.session.expired.
+        Signature invalide → 400 sans effet. Événement déjà traité → 200 sans effet.
+      responses:
+        '200': { description: Événement reçu }
+        '400': { $ref: '#/components/responses/InvalidInput' }
+
+components:
+  schemas:
+    Purchase:
+      type: object
+      required: [id, listingId, listingTitle, priceCents, status, createdAt]
+      properties:
+        id: { type: string }
+        listingId: { type: string }
+        listingTitle: { type: string }
+        priceCents: { type: integer }
+        status: { type: string, enum: [pending, confirmed, refunded, expired] }
+        createdAt: { type: string, format: date-time }
+        confirmedAt: { type: string, format: date-time, nullable: true }
+    SoldOnline:
+      type: object
+      required: [at, priceCents]
+      properties:
+        at: { type: string, format: date-time }
+        priceCents: { type: integer }
