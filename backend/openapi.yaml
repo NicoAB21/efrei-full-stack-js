@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: >
     API de petites annonces (Contrat API v1 du livret appliqué à la ressource `listings`).
-    Ce document décrit les routes réellement implémentées (MVP US1–US3 + vitrine publique US4).
+    Ce document décrit les routes réellement implémentées (MVP US1–US3, vitrine publique US4, messagerie US5).
     Prix en centimes. Toute erreur : {"error":{"code","message"}}.
 servers:
   - url: http://localhost:3000
@@ -20,6 +20,8 @@ tags:
     description: Favoris liés au compte (bonus, spec 002)
   - name: purchases
     description: Paiement de DÉMONSTRATION (Stripe en mode test, spec 005) ; routes absentes si aucune clé de test n'est configurée
+  - name: messages
+    description: Messagerie acheteur → vendeur (US5)
 
 paths:
   /api/health:
@@ -192,6 +194,55 @@ paths:
                         description: Achat en ligne de démonstration proposé (paiement activé, hors Immobilier / Véhicules, ≤ 10 000 €)
         '400': { $ref: '#/components/responses/InvalidInput' }
         '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/public/listings/{id}/messages:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    post:
+      tags: [messages]
+      summary: Écrire au vendeur d'une annonce disponible
+      description: >
+        Le destinataire est le propriétaire de l'annonce, calculé par le serveur ; l'expéditeur vient du JWT.
+        Seuls l'expéditeur et le vendeur peuvent voir le message.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [body]
+              properties:
+                body: { type: string, minLength: 1, maxLength: 1000, description: Espaces de début et de fin retirés }
+      responses:
+        '201':
+          description: Envoyé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Message' }
+        '400':
+          description: Corps invalide, id mal formé, ou message sur sa propre annonce
+          content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }   # inexistante ou vendue
+
+  /api/messages:
+    get:
+      tags: [messages]
+      summary: Messages reçus par le compte connecté, du plus récent au plus ancien
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/ReceivedMessage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
 
   /api/favorites:
     get:
@@ -574,6 +625,25 @@ components:
         status: { type: string, enum: [pending, confirmed, refunded, expired] }
         createdAt: { type: string, format: date-time }
         confirmedAt: { type: string, format: date-time, nullable: true }
+
+    Message:
+      type: object
+      required: [id, listingId, senderId, recipientId, body, createdAt]
+      properties:
+        id: { type: string }
+        listingId: { type: string }
+        senderId: { type: string }
+        recipientId: { type: string }
+        body: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    ReceivedMessage:
+      allOf:
+        - $ref: '#/components/schemas/Message'
+        - type: object
+          required: [listingTitle]
+          properties:
+            listingTitle: { type: string, nullable: true, description: null si l'annonce a été supprimée }
 
     Error:
       type: object

@@ -4,6 +4,7 @@ import { Link, useParams, useSearchParams } from 'react-router'
 import { apiFetch } from '../api'
 import { Alert } from '../components/Alert'
 import { BackLink } from '../components/BackLink'
+import { ContactSeller } from '../components/ContactSeller'
 import { Button } from '../components/Button'
 import { DemoBanner } from '../components/DemoBanner'
 import { Gallery } from '../components/Gallery'
@@ -101,6 +102,7 @@ function Detail({ id }: { id: string }) {
               </button>
             </div>
           )}
+          {listing.ownerId !== user?.id && <ContactSeller listingId={listing.id} />}
         </article>
       )}
     </div>
